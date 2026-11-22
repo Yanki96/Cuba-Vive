@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b27">
 <meta name="description" content="SIM Cuba: simulador de vida 3D low-poly ambientado en Cuba, con creador visual de personajes y ciudad explorable.">
-<title>SIM Cuba — Comercios, empleo y dominó 0.64</title>
+<title>SIM Cuba — Comercios, empleo y dominó 0.65</title>
 <style>
 :root{color-scheme:dark;--cream:#f2e8cc;--muted:#b6c6b7;--green:#a7cf8a;--gold:#e6c779;--line:#ffffff30}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172b27;color:var(--cream);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:#29413a;border-radius:10px;padding:10px 13px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -721,7 +721,7 @@
 }
 
 
-/* SIM Cuba 0.64 — interfaces por negocio, turno temporizado y dominó contra IA */
+/* SIM Cuba 0.65 — interfaces por negocio, turno temporizado y dominó contra IA */
 .game-panel:not(.phone-mode){width:min(460px,calc(100vw - 28px));padding:15px}
 .game-action-list{gap:7px;margin-top:12px}
 .game-action{min-height:57px;padding:8px 9px;gap:8px}
@@ -742,7 +742,7 @@
 }
 
 
-/* SIM Cuba 0.64 — interfaces específicas de negocios, jornada y dominó */
+/* SIM Cuba 0.65 — interfaces específicas de negocios, jornada y dominó */
 .game-panel.business-mode,.game-panel.work-mode,.game-panel.domino-mode{width:min(590px,100%);max-height:min(88dvh,780px)}
 .game-panel.business-mode #gameActionList,.game-panel.work-mode #gameActionList,.game-panel.domino-mode #gameActionList{display:block;margin-top:12px}
 .business-interface{display:flex;flex-direction:column;gap:11px}
@@ -811,7 +811,7 @@
 }
 
 
-/* SIM Cuba 0.64 — mesa de dominó con cadena serpenteante, fichas con puntos y movimiento */
+/* SIM Cuba 0.65 — mesa de dominó con cadena serpenteante, fichas con puntos y movimiento */
 .game-panel.domino-mode{width:min(790px,calc(100vw - 30px));max-height:min(94dvh,920px);padding:17px}
 .game-panel.domino-mode #gameActionList{display:block;margin-top:12px;max-height:calc(94dvh - 150px);overflow:auto;scrollbar-width:thin}
 .domino-interface{display:flex;flex-direction:column;gap:12px}
@@ -910,7 +910,7 @@
 }
 
 
-/* SIM Cuba 0.64 — dominó centrado, pases y fichas más legibles */
+/* SIM Cuba 0.65 — dominó centrado, pases y fichas más legibles */
 .game-panel.domino-mode{width:min(860px,calc(100vw - 22px));}
 .domino-table-felt{min-height:390px;}
 .domino-board-scroll{max-height:330px;min-height:180px;overflow:auto;padding:10px 4px;}
@@ -958,7 +958,7 @@
 }
 
 
-/* SIM Cuba 0.64 — separador correcto para las fichas seleccionables */
+/* SIM Cuba 0.65 — separador correcto para las fichas seleccionables */
 .domino-hand-tile .domino-divider{
  display:block;
  flex:0 0 2px;
@@ -973,7 +973,7 @@
 }
 
 
-/* SIM Cuba 0.64 — ajuste de orientación, recorrido y selección por mitad */
+/* SIM Cuba 0.65 — ajuste de orientación, recorrido y selección por mitad */
 .domino-board-center{grid-template-columns:minmax(0,1fr) 62px minmax(0,1fr);align-items:center;}
 .domino-arm{width:100%;min-width:0;align-items:stretch;}
 .domino-chain-row{width:100%;min-width:0;box-sizing:border-box;align-items:center;gap:4px;}
@@ -998,7 +998,7 @@
 }
 
 
-/* SIM Cuba 0.64 — conecta el brazo izquierdo con la ficha de apertura */
+/* SIM Cuba 0.65 — conecta el brazo izquierdo con la ficha de apertura */
 .domino-board-center{column-gap:0;}
 .domino-arm-left .domino-chain-row.is-reversed{
  flex-direction:row-reverse;
@@ -1014,7 +1014,7 @@
 }
 
 
-/* SIM Cuba 0.64 — orden explícito de las fichas y anclaje al centro */
+/* SIM Cuba 0.65 — orden explícito de las fichas y anclaje al centro */
 .domino-arm-left,.domino-arm-right{display:flex;width:100%;min-width:0;flex-direction:column;align-items:stretch;justify-content:center;}
 .domino-arm-left .domino-chain-row,.domino-arm-right .domino-chain-row{
  display:flex;width:100%;min-width:0;box-sizing:border-box;flex-direction:row!important;align-items:center;gap:4px;
@@ -1029,7 +1029,7 @@
 }
 
 
-/* SIM Cuba 0.64 — fichas verticales de giro en los límites de la mesa */
+/* SIM Cuba 0.65 — fichas verticales de giro en los límites de la mesa */
 .domino-turn-row{display:flex;width:100%;height:58px;min-height:58px;align-items:center;box-sizing:border-box;}
 .domino-turn-row.at-left{justify-content:flex-start;padding-left:1px;}
 .domino-turn-row.at-right{justify-content:flex-end;padding-right:1px;}
@@ -1043,6 +1043,29 @@
 @media(max-width:620px){
  .domino-turn-row{height:52px;min-height:52px;}
  .domino-chain-piece.is-vertical{flex-basis:35px;width:35px;min-width:35px;height:50px;}
+}
+
+
+/* SIM Cuba 0.65 — encaje exacto entre ficha horizontal y ficha de giro */
+.domino-arm{gap:0!important;}
+.domino-turn-row{
+ position:relative;
+ display:block;
+ width:100%;
+ height:58px;
+ min-height:58px;
+ box-sizing:border-box;
+}
+.domino-turn-row.at-left,.domino-turn-row.at-right{padding:0;}
+.domino-turn-row .domino-chain-piece.is-vertical{
+ position:absolute;
+ top:1px;
+ left:var(--turn-x);
+ margin:0;
+}
+@media(max-width:620px){
+ .domino-turn-row{height:52px;min-height:52px;}
+ .domino-turn-row .domino-chain-piece.is-vertical{top:1px;}
 }
 
 </style>
@@ -1235,7 +1258,7 @@
     <button class="randomize-btn" id="randomizeBtn" type="button">⤨ Sorpréndeme · Aleatorio</button>
    </aside>
   </div>
-  <footer class="creator-footer"><span>SIM CUBA <b>0.64</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
+  <footer class="creator-footer"><span>SIM CUBA <b>0.65</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
  </div>
 </div>
 <script>
@@ -2801,12 +2824,16 @@ function dominoHandFaceMarkup(tile){
 }
 function dominoArmMarkup(tiles,side){
  if(!tiles.length)return '<div class="domino-arm-empty">'+(side==='left'?'←':'→')+'</div>';
- const columns=window.innerWidth<=620?2:4;
+ const mobile=window.innerWidth<=620;
+ const columns=mobile?2:4;
+ const pieceWidth=mobile?55:54;
+ const pieceGap=mobile?3:4;
+ const verticalWidth=mobile?35:40;
  let html='',cursor=0,row=0;
  while(cursor<tiles.length){
   const part=tiles.slice(cursor,cursor+columns);
   cursor+=part.length;
-  // Keep the fixed center anchoring from 0.64 and turn at the outer edge.
+  // Keep the center anchoring and tile order from 0.63/0.65 unchanged.
   const runsFromCenter=(side==='left')?(row%2===0):(row%2===1);
   const ordered=runsFromCenter?part.slice().reverse():part;
   const alignment=runsFromCenter?'edge-right':'edge-left';
@@ -2817,9 +2844,15 @@ function dominoArmMarkup(tiles,side){
   html+='<div class="domino-chain-row '+alignment+'">'+markup+'</div>';
   if(cursor<tiles.length){
    const turn=tiles[cursor++];
-   const at=(side==='left')?(row%2===0?'at-left':'at-right'):(row%2===0?'at-right':'at-left');
+   const turnAtLeft=(side==='left')?(row%2===0):(row%2===1);
+   const at=turnAtLeft?'at-left':'at-right';
+   const runWidth=part.length*pieceWidth+(part.length-1)*pieceGap;
+   // Center the vertical tile over the actual outermost horizontal tile.
+   const turnX=turnAtLeft
+    ?'calc(100% - '+runWidth+'px + '+((pieceWidth-verticalWidth)/2)+'px)'
+    :(runWidth-(pieceWidth+verticalWidth)/2)+'px';
    const fresh=dominoGame.lastMove&&dominoGame.lastMove.id===turn.id?' is-new':'';
-   html+='<div class="domino-turn-row '+at+'"><div class="domino-piece domino-chain-piece is-vertical'+fresh+'" aria-label="Ficha de giro '+turn.a+' y '+turn.b+'">'+dominoTurnFaceMarkup(turn,side)+'</div></div>';
+   html+='<div class="domino-turn-row '+at+'" style="--turn-x:'+turnX+'"><div class="domino-piece domino-chain-piece is-vertical'+fresh+'" aria-label="Ficha de giro '+turn.a+' y '+turn.b+'">'+dominoTurnFaceMarkup(turn,side)+'</div></div>';
   }
   row++;
  }
