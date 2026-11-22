@@ -1828,7 +1828,7 @@ const RURAL_PATHS=[
  {name:'Poblado este',points:[[46,13.8],[50,15.5],[54,16],[59,15.7],[63.2,14.8],[66,13.5]]}
 ];
 // Borde asfaltado que une las calles urbanas entre sí con esquinas redondeadas.
-const CITY_LOOP_ANCHORS=[[-62,-68],[62,-68],[68,-62],[68,62],[62,68],[-62,68],[-68,62],[-68,-62]];
+const CITY_LOOP_ANCHORS=[[-62,-68],[-20,-68],[20,-68],[62,-68],[68,-62],[68,-20],[68,20],[68,62],[62,68],[20,68],[-20,68],[-62,68],[-68,62],[-68,20],[-68,-20],[-68,-62]];
 function sampleRoadCurve(anchors,closed=false,steps=8){
  const n=anchors.length,out=[],segments=closed?n:n-1;
  const at=i=>anchors[closed?(i+n)%n:Math.max(0,Math.min(n-1,i))];
