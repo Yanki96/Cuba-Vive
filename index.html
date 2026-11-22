@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b27">
 <meta name="description" content="SIM Cuba: simulador de vida 3D low-poly ambientado en Cuba, con creador visual de personajes y ciudad explorable.">
-<title>SIM Cuba — Mapa ampliado 0.81</title>
+<title>SIM Cuba — Gran mapa verde 0.82</title>
 <style>
 :root{color-scheme:dark;--cream:#f2e8cc;--muted:#b6c6b7;--green:#a7cf8a;--gold:#e6c779;--line:#ffffff30}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172b27;color:var(--cream);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:#29413a;border-radius:10px;padding:10px 13px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -1717,7 +1717,7 @@
     <button class="randomize-btn" id="randomizeBtn" type="button">⤨ Sorpréndeme · Aleatorio</button>
    </aside>
   </div>
-  <footer class="creator-footer"><span>SIM CUBA <b>0.81</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
+  <footer class="creator-footer"><span>SIM CUBA <b>0.82</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
  </div>
 </div>
 <script>
@@ -1812,11 +1812,11 @@ const dominoConfig={players:2,handSize:7,teamMode:false};
 const SAVE_KEY='simcuba.save.v021'; // Mantiene compatibilidad con partidas anteriores
 const AUTO_START_KEY='simcuba.autostart.v1';
 const MOVE_SPEED=2.8; // unidades del mundo por segundo; velocidad continua independiente del zoom
-const NAV={minX:-50.4,minY:-50.4,step:.18,nx:561,ny:561}; // 100.8 × 100.8 unidades: casi 5 veces la superficie anterior.
+const NAV={minX:-71.1,minY:-71.1,step:.18,nx:791,ny:791}; // 142.2 × 142.2 unidades: unas 10 veces el área del casco urbano original.
 const CITY_ROADS=[-20,-10,0,10,20];
-const OUTER_ROADS=[-40,40];
+const OUTER_ROADS=[-60,-40,40,60];
 const MAP_ROADS=[...CITY_ROADS,...OUTER_ROADS];
-const CITY_EDGE=49.8;
+const CITY_EDGE=70.5;
 const $=id=>document.getElementById(id);
 const CREATOR_SKIN={ '🏻':'#f0c9a6','🏼':'#dfae87','🏽':'#bd8965','🏾':'#8d5a3e','🏿':'#603b2b' };
 const ACCESSORY_NAMES={glasses:'Gafas',cap:'Gorra',backpack:'Mochila',chain:'Cadena',watch:'Reloj',earrings:'Pendientes',bracelet:'Pulsera',bandana:'Pañuelo'};
@@ -2186,11 +2186,66 @@ function buildCityObjects(){
  add('pond',36.1,-26.3,{rx:1.85,rz:1.30},{type:'circle',x:36.1,y:-26.3,r:2.05});
  add('pond',-36.0,36.0,{rx:1.35,rz:1.05},{type:'circle',x:-36.0,y:36.0,r:1.55});
 
+
+ // Cuatro poblados satélite en los caminos cardinales, además de las fincas diagonales.
+ const satelliteVillages=[
+  {x:0,z:-54,style:'colonial',shop:'bodega'},
+  {x:0,z:54,style:'house',shop:'market'},
+  {x:-54,z:0,style:'colonial',shop:'workshop'},
+  {x:54,z:0,style:'house',shop:'cafe'}
+ ];
+ satelliteVillages.forEach((v,index)=>{
+  addBuilding(v.x-3.7,v.z-2.8,2.5,2.4,v.style,index+2);
+  addBuilding(v.x+.9,v.z-2.9,2.4,2.35,'house',index+4);
+  addBuilding(v.x-1.3,v.z+2.1,2.6,2.35,v.shop,index+1);
+  add('clothes',v.x-4.0,v.z+1.1,{}, {type:'circle',x:v.x-4.0,y:v.z+1.1,r:.38});
+  add('lamp',v.x+4.3,v.z+.3,{}, {type:'circle',x:v.x+4.3,y:v.z+.3,r:.16});
+  add('bench',v.x+.4,v.z+5.2,{}, {type:'circle',x:v.x+.4,y:v.z+5.2,r:.30});
+  for(const [dx,dz,variant] of [[-5,-5,2],[5,-4,0],[-5,4,1],[5,5,2]])
+   place('tree',v.x+dx,v.z+dz,{variant},.40);
+ });
+
+ // Pequeños bosques de palmas y frutales. Se plantan en grupos irregulares,
+ // pero se respetan caminos, construcciones y pasos libres.
+ const groves=[
+  {x:-50,z:-20,r:5},{x:48,z:-22,r:5},{x:-50,z:23,r:5},{x:50,z:24,r:5},
+  {x:-25,z:-52,r:4.5},{x:27,z:-52,r:4.5},{x:-26,z:52,r:4.5},{x:27,z:52,r:4.5},
+  {x:-57,z:3,r:4},{x:57,z:-2,r:4}
+ ];
+ groves.forEach((g,gi)=>{
+  let planted=0,attempt=0;
+  while(planted<15&&attempt<260){
+   attempt++;
+   const a=rng()*Math.PI*2,rad=Math.sqrt(rng())*g.r;
+   const x=g.x+Math.cos(a)*rad,z=g.z+Math.sin(a)*rad;
+   const variant=[2,0,2,1,2,0,1][Math.floor(rng()*7)];
+   if(canPlaceProp(x,z,.38,.48)){
+    add('tree',x,z,{variant},{type:'circle',x,y:z,r:.38});
+    planted++;
+   }
+  }
+  // Helechos y matorrales bajos alrededor de cada grupo de palmas.
+  let lowPlants=0,tries=0;
+  while(lowPlants<11&&tries<220){
+   tries++;
+   const a=rng()*Math.PI*2,rad=1.2+rng()*g.r;
+   const x=g.x+Math.cos(a)*rad,z=g.z+Math.sin(a)*rad;
+   if(canPlaceProp(x,z,.16,.18)){
+    add('plant',x,z,{variant:Math.floor(rng()*4)},{type:'circle',x,y:z,r:.16});
+    lowPlants++;
+   }
+  }
+ });
+ // Más zonas húmedas y orillas verdes en el campo exterior.
+ add('pond',-57,-29,{rx:1.7,rz:1.25},{type:'circle',x:-57,y:-29,r:1.90});
+ add('pond',56,31,{rx:1.9,rz:1.35},{type:'circle',x:56,y:31,r:2.05});
+ add('pond',-28,59,{rx:1.35,rz:1.0},{type:'circle',x:-28,y:59,r:1.55});
+
  // Palmeras, árboles frutales y árboles de sombra por las afueras.
  let outerTreeCount=0;
  const outerTreeVariants=[2,0,1,2,2,0,1,2,0];
- for(let i=0;i<5200&&outerTreeCount<104;i++){
-  const x=-48+rng()*96,z=-48+rng()*96;
+ for(let i=0;i<14000&&outerTreeCount<360;i++){
+  const x=-68+rng()*136,z=-68+rng()*136;
   if(Math.abs(x)<24&&Math.abs(z)<24)continue;
   if(canPlaceProp(x,z,.40,.60)){
    const variant=outerTreeVariants[Math.floor(rng()*outerTreeVariants.length)];
@@ -2200,8 +2255,8 @@ function buildCityObjects(){
  }
  // Matorrales y plantas tropicales en patios, cunetas y claros.
  let outerPlantCount=0;
- for(let i=0;i<3800&&outerPlantCount<72;i++){
-  const x=-48+rng()*96,z=-48+rng()*96;
+ for(let i=0;i<10000&&outerPlantCount<280;i++){
+  const x=-68+rng()*136,z=-68+rng()*136;
   if(Math.abs(x)<23&&Math.abs(z)<23)continue;
   if(canPlaceProp(x,z,.18,.22)){
    add('plant',x,z,{variant:Math.floor(rng()*4)},{type:'circle',x,y:z,r:.18});
@@ -2210,8 +2265,8 @@ function buildCityObjects(){
  }
  // Piedras bajas para romper la repetición del césped.
  let outerRockCount=0;
- for(let i=0;i<2100&&outerRockCount<28;i++){
-  const x=-48+rng()*96,z=-48+rng()*96;
+ for(let i=0;i<7000&&outerRockCount<68;i++){
+  const x=-68+rng()*136,z=-68+rng()*136;
   if(Math.abs(x)<24&&Math.abs(z)<24)continue;
   if(canPlaceProp(x,z,.20,.24)){
    const scale=.75+rng()*.65;
@@ -2717,8 +2772,8 @@ function addStaticWorld(m){
  // El barrio ocupa 45x45 unidades; este terreno deja margen para el zoom mínimo y el desplazamiento.
  m.box(-110,-.34,-110,220,.34,220,'#8eaf70','#85a568','#74945d');
  addWalkableArea3D(m);addCityRoadNetwork3D(m);
- for(let i=0;i<1250;i++){
-  const x=-49+((i*73)%980)/10,z=-49+((i*127)%980)/10;
+ for(let i=0;i<2300;i++){
+  const x=-70+((i*73)%1400)/10,z=-70+((i*127)%1400)/10;
   if(isBlocked(x,z,obstacles())||MAP_ROADS.some(r=>Math.abs(x-r)<1.32||Math.abs(z-r)<1.32))continue;
   m.box(x,.003,z,.10+(i%3)*.045,.012,.10+(i%2)*.05,['#9dbd7c','#a8c585','#8eae6d'][i%3]);
  }
@@ -2961,7 +3016,7 @@ function nearBlock(block,x,y,pad=0){if(block.type==='rect'){const dx=Math.max(bl
 
 function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2300)}
 function log(msg){toast(msg)}
-function districtAt(x,y){if(Math.abs(x)<22&&Math.abs(y)<22){if(x>10&&y<-10)return 'Parque';if(x<-10&&y>10)return 'Mercado';if(Math.abs(x)<10&&Math.abs(y)<10)return 'Centro';if(x>10&&y>0)return 'Zona de servicios';if(x<-10&&y<0)return 'Residencial';return 'Barrios'}if(x<-22&&y<-22)return 'Vega del Norte';if(x>22&&y<-22)return 'Palmares del Norte';if(x<-22&&y>22)return 'Fincas del Sur';if(x>22&&y>22)return 'Poblado del Este';if(x>22)return 'Camino del Este';if(x<-22)return 'Camino del Oeste';if(y>22)return 'Camino del Sur';return 'Camino del Norte'}
+function districtAt(x,y){if(Math.abs(x)<22&&Math.abs(y)<22){if(x>10&&y<-10)return 'Parque';if(x<-10&&y>10)return 'Mercado';if(Math.abs(x)<10&&Math.abs(y)<10)return 'Centro';if(x>10&&y>0)return 'Zona de servicios';if(x<-10&&y<0)return 'Residencial';return 'Barrios'}if(Math.abs(x)<18&&y<-43)return 'Poblado del Norte';if(Math.abs(x)<18&&y>43)return 'Poblado del Sur';if(x<-43&&Math.abs(y)<18)return 'Pueblo del Oeste';if(x>43&&Math.abs(y)<18)return 'Pueblo del Este';if(x<-22&&y<-22)return 'Vega del Norte';if(x>22&&y<-22)return 'Palmares del Norte';if(x<-22&&y>22)return 'Fincas del Sur';if(x>22&&y>22)return 'Poblado del Este';if(x>22)return 'Camino del Este';if(x<-22)return 'Camino del Oeste';if(y>22)return 'Camino del Sur';return 'Camino del Norte'}
 function getDeviceClock(){
  const now=new Date();
  return new Intl.DateTimeFormat(undefined,{hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(now);
