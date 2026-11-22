@@ -2353,7 +2353,7 @@ function performGameAction(id){
  if(id==='work-shift'){
   if(!job){toast('Primero necesitas conseguir un empleo.');return}
   const hour=Math.floor(minutes/60);if(hour<7||hour>=18){toast('El turno está disponible entre las 7:00 y las 18:00.');return}
-  if(needs.energy<22||needs.hunger<15||needs.health<20){toast('Necesitas comer, descansar o recuperarte antes de trabajar.');return}
+  if(needs.energy<22||needs.hunger<15){toast('Estás demasiado cansado o tienes demasiada hambre para trabajar.');return}
   advanceGameMinutes(240);changeNeeds({energy:-25,hunger:-26,hygiene:-12,fun:-9,social:4});job.shifts++;
   let pay=job.pay;if(job.shifts%5===0){job.pay+=50;toast('¡Te ganaste un pequeño aumento!')}
   cash+=pay;finishQuest('worked',200,'¡Primer turno completado!');updateGameHUD();saveGame();close();toast(`Terminaste tu turno y cobraste ${formatCash(pay)}.`);return;
