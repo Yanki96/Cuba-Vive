@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b27">
 <meta name="description" content="SIM Cuba: simulador de vida 3D low-poly ambientado en Cuba, con creador visual de personajes y ciudad explorable.">
-<title>SIM Cuba — Interfaz 0.37</title>
+<title>SIM Cuba — Interacciones 0.38</title>
 <style>
 :root{color-scheme:dark;--cream:#f2e8cc;--muted:#b6c6b7;--green:#a7cf8a;--gold:#e6c779;--line:#ffffff30}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172b27;color:var(--cream);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:#29413a;border-radius:10px;padding:10px 13px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -720,6 +720,27 @@
  #gameHud .hud-dock button{transition:none!important}
 }
 
+
+/* SIM Cuba 0.38 — interacciones agrupadas y paneles más compactos */
+.game-panel:not(.phone-mode){width:min(460px,calc(100vw - 28px));padding:15px}
+.game-action-list{gap:7px;margin-top:12px}
+.game-action{min-height:57px;padding:8px 9px;gap:8px}
+.game-action .action-icon{width:31px;height:31px;font-size:17px;border-radius:9px}
+.game-action b{font-size:9px}
+.game-action small{font-size:8px}
+.interaction-back{
+ grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:7px;
+ min-height:38px;margin-top:3px;padding:8px 12px;border:1px solid #ffffff24;
+ border-radius:10px;background:#ffffff0a;color:#d7e0cc;font-size:9px;font-weight:850;
+ cursor:pointer;touch-action:manipulation;
+}
+.interaction-back:hover{background:#ffffff16;border-color:#d7c77d88}
+@media(max-width:650px){
+ .game-panel:not(.phone-mode){width:100%;padding:13px}
+ .game-action-list{grid-template-columns:1fr;gap:6px;margin-top:10px}
+ .game-action{min-height:53px;padding:8px}
+}
+
 </style>
 </head>
 <body>
@@ -910,7 +931,7 @@
     <button class="randomize-btn" id="randomizeBtn" type="button">⤨ Sorpréndeme · Aleatorio</button>
    </aside>
   </div>
-  <footer class="creator-footer"><span>SIM CUBA <b>0.37</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
+  <footer class="creator-footer"><span>SIM CUBA <b>0.38</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
  </div>
 </div>
 <script>
@@ -2146,42 +2167,15 @@ function interactWithObject(o){
  pendingInteraction=target;route=bestPath;clickTarget=bestPath[bestPath.length-1];
  closeGamePanel();toast('Caminando hacia '+target.label.toLowerCase()+'…');draw();return true;
 }
-function nearestAction(targetOverride=null){
- const target=targetOverride||getNearbyInteractable();
- if(!target){toast('Acércate a una casa, tienda, cafetería o lugar de descanso.');return}
- if(target.kind==='home'){
-  openGamePanel('Tu casa','Tu habitación es sencilla, pero aquí puedes recuperarte y prepararte para el día.',[
-   {id:'sleep',icon:'🛏️',title:'Dormir 8 horas',sub:'Recupera energía y avanza al siguiente día.'},
-   {id:'shower',icon:'🚿',title:'Ducharte',sub:'Mejora la higiene · 20 minutos.'},
-   {id:'tidy',icon:'🧹',title:'Ordenar la habitación',sub:'Mejora el ánimo · 30 minutos.'}
-  ],'HOGAR','Hogar · '+(HOME_BUILDING?.style||'casa'));
- }else if(target.kind==='store'||target.kind==='cafe'||target.kind==='work'){
-  const style=target.obj.style||'shop';const actions=[];
-  actions.push({id:'buy-bread',icon:'🥖',title:'Pan con tortilla',sub:'90 CUP · +22 hambre'});
-  actions.push({id:'buy-snack',icon:'🥪',title:'Bocadito',sub:'110 CUP · +18 hambre, +5 diversión'});
-  actions.push({id:'buy-meal',icon:'🍛',title:'Plato del día',sub:'220 CUP · +48 hambre, +8 diversión'});
-  actions.push({id:'buy-juice',icon:'🧃',title:'Jugo',sub:'65 CUP · +7 hambre, +12 diversión'});
-  if(!job)actions.push({id:'apply-job',icon:'📋',title:'Solicitar empleo',sub:'Pregunta por una oportunidad de trabajo.'});
-  else actions.push({id:'work-shift',icon:'🧰',title:'Trabajar un turno',sub:`4 horas · Cobras ${formatCash(job.pay)} al terminar.`});
-  openGamePanel(target.title,style==='bodega'?'Productos básicos y algo para comer.':'Compra algo, pregunta por trabajo o realiza tu turno.',actions,'COMERCIO',`Dinero disponible · ${formatCash(cash)}`);
- }else if(target.kind==='domino'){
-  openGamePanel('Mesa de dominó','Un rato de dominó en el barrio: despeja la mente y comparte con otros vecinos.',[
-   {id:'domino-game',icon:'🁫',title:'Jugar una partida',sub:'30 minutos · + diversión y socialización.'},
-   {id:'leave',icon:'🚶',title:'Seguir caminando',sub:'Volver a la ciudad.'}
-  ],'VIDA DE BARRIO','Parque / plaza');
- }else{
-  openGamePanel('Banco del parque','Tómate un descanso antes de seguir con tus planes.',[
-   {id:'rest',icon:'🌳',title:'Descansar 30 minutos',sub:'+ energía y diversión.'},
-   {id:'leave',icon:'🚶',title:'Seguir caminando',sub:'Volver a la ciudad.'}
-  ],'DESCANSO','Espacio público');
- }
-}
 function openGamePanel(title,description,actions,kicker='INTERACCIÓN',foot='E · Interactuar'){
  if(phoneCloseTimer){clearTimeout(phoneCloseTimer);phoneCloseTimer=null}
  $('gameModal').classList.remove('phone-modal','phone-modal-enter','phone-modal-exit');
  $('gamePanel').classList.remove('phone-mode');
  $('gamePanelTitle').textContent=title;$('gamePanelDescription').textContent=description;$('gamePanelKicker').textContent=kicker;$('gamePanelFootLeft').textContent=foot;
- $('gameActionList').innerHTML=actions.map(a=>`<button type="button" class="game-action" data-game-action="${a.id}" ${a.disabled?'disabled':''}><span class="action-icon">${a.icon}</span><span><b>${a.title}</b><small>${a.sub}</small></span></button>`).join('');
+ $('gameActionList').innerHTML=actions.map(a=>{
+  const actionAttr=a.group?`data-action-group="${a.group}"`:`data-game-action="${a.id}"`;
+  return `<button type="button" class="game-action" ${actionAttr} ${a.disabled?'disabled':''}><span class="action-icon">${a.icon}</span><span><b>${a.title}</b><small>${a.sub}</small></span></button>`;
+ }).join('');
  $('gameModal').classList.remove('hidden');
 }
 function openProfile(){
@@ -2219,36 +2213,58 @@ function closeGamePanel(){
  }
  modal.classList.add('hidden');modal.classList.remove('phone-modal','phone-modal-enter','phone-modal-exit');panel.classList.remove('phone-mode');
 }
-function nearestAction(){
- const target=getNearbyInteractable();if(!target){toast('Acércate a una casa, tienda, cafetería o lugar de descanso.');return}
+let currentInteractionTarget=null;
+function nearestAction(targetOverride=null){
+ const target=targetOverride||getNearbyInteractable();
+ if(!target){toast('Acércate a una casa, tienda, cafetería o lugar de descanso.');return}
+ currentInteractionTarget=target;
  if(target.kind==='home'){
-  openGamePanel('Tu casa','Tu habitación es sencilla, pero aquí puedes recuperarte y prepararte para el día.',[
-   {id:'sleep',icon:'🛏️',title:'Dormir 8 horas',sub:'Recupera energía y avanza al siguiente día.'},
-   {id:'shower',icon:'🚿',title:'Ducharte',sub:'Mejora la higiene · 20 minutos.'},
-   {id:'tidy',icon:'🧹',title:'Ordenar la habitación',sub:'Mejora el ánimo · 30 minutos.'}
+  openGamePanel('Tu casa','Elige qué hacer en casa.',[
+   {id:'sleep',icon:'🛏️',title:'Dormir',sub:'Descansa 8 horas y recupera energía.'},
+   {group:'homecare',icon:'🚿',title:'Rutina personal',sub:'Ducharte u ordenar la habitación.'}
   ],'HOGAR','Hogar · '+(HOME_BUILDING?.style||'casa'));
  }else if(target.kind==='store'||target.kind==='cafe'||target.kind==='work'){
-  const style=target.obj.style||'shop';const actions=[];
-  actions.push({id:'buy-bread',icon:'🥖',title:'Pan con tortilla',sub:'90 CUP · +22 hambre'});
-  actions.push({id:'buy-snack',icon:'🥪',title:'Bocadito',sub:'110 CUP · +18 hambre, +5 diversión'});
-  actions.push({id:'buy-meal',icon:'🍛',title:'Plato del día',sub:'220 CUP · +48 hambre, +8 diversión'});
-  actions.push({id:'buy-juice',icon:'🧃',title:'Jugo',sub:'65 CUP · +7 hambre, +12 diversión'});
+  const actions=[{group:'food',icon:'🛒',title:'Comprar comida',sub:'Ver los productos disponibles.'}];
   if(!job)actions.push({id:'apply-job',icon:'📋',title:'Solicitar empleo',sub:'Pregunta por una oportunidad de trabajo.'});
   else actions.push({id:'work-shift',icon:'🧰',title:'Trabajar un turno',sub:`4 horas · Cobras ${formatCash(job.pay)} al terminar.`});
-  const title=target.title;
-  openGamePanel(title,style==='bodega'?'Productos básicos y algo para comer.':'Compra algo, pregunta por trabajo o realiza tu turno.',actions,'COMERCIO',`Dinero disponible · ${formatCash(cash)}`);
+  openGamePanel(target.title,'Compra comida o gestiona tu trabajo.',actions,'COMERCIO',`Dinero disponible · ${formatCash(cash)}`);
  }else if(target.kind==='domino'){
-  openGamePanel('Mesa de dominó','Un rato de dominó en el barrio: despeja la mente y comparte con otros vecinos.',[
-   {id:'domino-game',icon:'🁫',title:'Jugar una partida',sub:'30 minutos · + diversión y socialización.'},
-   {id:'leave',icon:'🚶',title:'Seguir caminando',sub:'Volver a la ciudad.'}
+  openGamePanel('Mesa de dominó','Comparte una partida y despeja la mente.',[
+   {id:'domino-game',icon:'🁫',title:'Jugar dominó',sub:'30 minutos · Diversión y socialización.'}
   ],'VIDA DE BARRIO','Parque / plaza');
  }else{
   openGamePanel('Banco del parque','Tómate un descanso antes de seguir con tus planes.',[
-   {id:'rest',icon:'🌳',title:'Descansar 30 minutos',sub:'+ energía y diversión.'},
-   {id:'leave',icon:'🚶',title:'Seguir caminando',sub:'Volver a la ciudad.'}
+   {id:'rest',icon:'🌳',title:'Descansar',sub:'30 minutos · Recupera energía y diversión.'}
   ],'DESCANSO','Espacio público');
  }
 }
+function openInteractionGroup(group){
+ const target=currentInteractionTarget;if(!target)return;
+ let title='',description='',actions=[],kicker='INTERACCIÓN',foot='';
+ if(group==='food'){
+  title='Comprar comida';description='Selecciona lo que quieres llevarte.';
+  actions=[
+   {id:'buy-bread',icon:'🥖',title:'Pan con tortilla',sub:'90 CUP · +22 hambre'},
+   {id:'buy-snack',icon:'🥪',title:'Bocadito',sub:'110 CUP · +18 hambre, +5 diversión'},
+   {id:'buy-meal',icon:'🍛',title:'Plato del día',sub:'220 CUP · +48 hambre, +8 diversión'},
+   {id:'buy-juice',icon:'🧃',title:'Jugo',sub:'65 CUP · +7 hambre, +12 diversión'}
+  ];
+  kicker='COMPRAS';foot=`Dinero disponible · ${formatCash(cash)}`;
+ }else if(group==='homecare'){
+  title='Rutina personal';description='Acciones para cuidar tu higiene y tu habitación.';
+  actions=[
+   {id:'shower',icon:'🚿',title:'Ducharte',sub:'20 minutos · Mejora la higiene.'},
+   {id:'tidy',icon:'🧹',title:'Ordenar habitación',sub:'30 minutos · Mejora el ánimo.'}
+  ];
+  kicker='HOGAR';foot='Tu casa';
+ }else return;
+ openGamePanel(title,description,actions,kicker,foot);
+ const back=document.createElement('button');
+ back.type='button';back.className='interaction-back';back.dataset.interactionBack='true';
+ back.textContent='← Volver';
+ $('gameActionList').appendChild(back);
+}
+
 function finishQuest(key,reward,message){if(quest[key])return;quest[key]=true;cash+=reward;toast(message+` +${reward} CUP`);updateGameHUD();saveGame()}
 function performGameAction(id){
  const close=()=>{closeGamePanel();updateGameHUD()};
@@ -2373,7 +2389,17 @@ function openInventory(){
  $('inventoryCount').textContent=String(Object.values(inventory).reduce((sum,n)=>sum+(Number(n)||0),0));$('gamePanelTitle').textContent='Tu mochila';$('gamePanelDescription').textContent='Lo que llevas contigo durante el día.';$('gamePanelKicker').textContent='INVENTARIO';$('gamePanelFootLeft').textContent='Dinero · '+formatCash(cash);content.innerHTML=html;modal.classList.remove('hidden');
 }
 function consumeItem(key){if(!inventory[key])return;const effects={bread:{hunger:22},snack:{hunger:18,fun:5},meal:{hunger:48,fun:8},juice:{hunger:7,fun:12}};inventory[key]--;changeNeeds(effects[key]||{});advanceGameMinutes(key==='meal'?20:10);toast('Has consumido '+({bread:'pan con tortilla',snack:'un bocadito',meal:'el plato del día',juice:'un jugo'}[key])+'.');saveGame();openInventory()}
-$('gameActionList').addEventListener('click',e=>{const close=e.target.closest('[data-close-panel]');if(close){closeGamePanel();return}const autoSwitch=e.target.closest('[data-toggle-auto-start]');if(autoSwitch){setAutoStartPreference(!getAutoStartPreference());return}const theme=e.target.closest('[data-phone-theme-option]');if(theme){setPhoneTheme(theme.dataset.phoneThemeOption);return}const a=e.target.closest('[data-game-action]');if(a){performGameAction(a.dataset.gameAction);return}const use=e.target.closest('[data-use-item]');if(use){consumeItem(use.dataset.useItem);return}const phone=e.target.closest('[data-phone-app]');if(phone){openPhoneApp(phone.dataset.phoneApp);return}if(e.target.closest('[data-phone-back]'))openPhone()});
+$('gameActionList').addEventListener('click',e=>{
+ const close=e.target.closest('[data-close-panel]');if(close){closeGamePanel();return}
+ const autoSwitch=e.target.closest('[data-toggle-auto-start]');if(autoSwitch){setAutoStartPreference(!getAutoStartPreference());return}
+ const theme=e.target.closest('[data-phone-theme-option]');if(theme){setPhoneTheme(theme.dataset.phoneThemeOption);return}
+ const interactionBack=e.target.closest('[data-interaction-back]');if(interactionBack){nearestAction(currentInteractionTarget);return}
+ const group=e.target.closest('[data-action-group]');if(group){openInteractionGroup(group.dataset.actionGroup);return}
+ const a=e.target.closest('[data-game-action]');if(a){performGameAction(a.dataset.gameAction);return}
+ const use=e.target.closest('[data-use-item]');if(use){consumeItem(use.dataset.useItem);return}
+ const phone=e.target.closest('[data-phone-app]');if(phone){openPhoneApp(phone.dataset.phoneApp);return}
+ if(e.target.closest('[data-phone-back]'))openPhone()
+});
 $('gamePanelClose').addEventListener('click',closeGamePanel);$('gameModal').addEventListener('click',e=>{if(e.target===$('gameModal'))closeGamePanel()});
 // SIM Cuba 0.37: listeners directos en cada acceso del HUD.
 // Evita que una capa transparente o la propagación del evento bloquee los botones.
