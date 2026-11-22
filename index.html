@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b27">
 <meta name="description" content="SIM Cuba: simulador de vida 3D low-poly ambientado en Cuba, con creador visual de personajes y ciudad explorable.">
-<title>SIM Cuba — Comercios, empleo y dominó 0.79</title>
+<title>SIM Cuba — Comercios, empleo y dominó 0.80</title>
 <style>
 :root{color-scheme:dark;--cream:#f2e8cc;--muted:#b6c6b7;--green:#a7cf8a;--gold:#e6c779;--line:#ffffff30}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172b27;color:var(--cream);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:#29413a;border-radius:10px;padding:10px 13px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -1717,7 +1717,7 @@
     <button class="randomize-btn" id="randomizeBtn" type="button">⤨ Sorpréndeme · Aleatorio</button>
    </aside>
   </div>
-  <footer class="creator-footer"><span>SIM CUBA <b>0.79</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
+  <footer class="creator-footer"><span>SIM CUBA <b>0.80</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
  </div>
 </div>
 <script>
@@ -3302,8 +3302,8 @@ function dominoArmMarkup(tiles,side,originIsDouble=false){
   :{tileW:54,tileH:35,gap:8,rowGap:9,columns:4,centerWidth:136};
  const {tileW,tileH,gap,rowGap,columns,centerWidth}=cfg;
  const turnGap=gap;
- // Los brazos apenas entran en la columna central: evita que los extremos izquierdo y derecho se alcancen.
- const centerInset=mobile?4:8;
+ // Deja 9 px entre la ficha inicial y la primera ficha de cada brazo, sin perder el espacio de seguridad.
+ const centerInset=Math.max(0,(centerWidth-tileH)/2-9);
  const turnRowHeight=tileW-tileH/2+rowGap;
  let html='',cursor=0,row=0,nextAnchor=null,nextStartsAtLeft=false;
  while(cursor<tiles.length){
