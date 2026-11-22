@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b27">
 <meta name="description" content="SIM Cuba: simulador de vida 3D low-poly ambientado en Cuba, con creador visual de personajes y ciudad explorable.">
-<title>SIM Cuba — Comercios, empleo y dominó 0.70</title>
+<title>SIM Cuba — Comercios, empleo y dominó 0.71</title>
 <style>
 :root{color-scheme:dark;--cream:#f2e8cc;--muted:#b6c6b7;--green:#a7cf8a;--gold:#e6c779;--line:#ffffff30}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172b27;color:var(--cream);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:#29413a;border-radius:10px;padding:10px 13px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -1246,6 +1246,73 @@
   height:52px;
  }
 }
+
+/* SIM Cuba 0.71 — avisos de eventos en el centro de la mesa de dominó */
+.domino-center-notice{
+ --notice-accent:#e9d18a;
+ position:absolute;z-index:8;left:50%;top:51%;
+ display:flex;align-items:center;justify-content:center;gap:12px;
+ width:min(370px,calc(100% - 28px));min-height:86px;padding:15px 19px;
+ overflow:hidden;transform:translate(-50%,-50%);
+ border:1px solid color-mix(in srgb,var(--notice-accent) 78%,transparent);
+ border-radius:18px;
+ background:linear-gradient(125deg,#10271fee,#19382fed 62%,#10281fee);
+ box-shadow:0 15px 42px #00130f99,0 0 0 3px #e8d18a12,inset 0 1px #ffffff20;
+ backdrop-filter:blur(7px);pointer-events:none;
+ animation:dominoCenterNoticeIn .48s cubic-bezier(.18,.85,.25,1.12) both;
+}
+.domino-center-notice.is-pass{--notice-accent:#f1d58a}
+.domino-center-notice.is-ai-pass{--notice-accent:#a9d8bd}
+.domino-center-notice.is-win{--notice-accent:#bfe28e}
+.domino-center-notice.is-loss{--notice-accent:#e99a8e}
+.domino-center-notice.is-draw{--notice-accent:#a9cbe0}
+.domino-center-notice:before{
+ content:"";position:absolute;inset:5px;border:1px solid color-mix(in srgb,var(--notice-accent) 23%,transparent);
+ border-radius:13px;pointer-events:none;
+}
+.domino-center-notice-icon{
+ position:relative;z-index:1;display:grid;place-items:center;flex:0 0 48px;
+ width:48px;height:48px;border:1px solid color-mix(in srgb,var(--notice-accent) 68%,transparent);
+ border-radius:15px;background:color-mix(in srgb,var(--notice-accent) 14%,transparent);
+ color:var(--notice-accent);font-size:25px;font-weight:1000;
+ text-shadow:0 0 16px color-mix(in srgb,var(--notice-accent) 60%,transparent);
+ box-shadow:0 0 20px color-mix(in srgb,var(--notice-accent) 13%,transparent);
+ animation:dominoNoticeIconPulse 1.25s ease-in-out infinite;
+}
+.domino-center-notice-copy{position:relative;z-index:1;display:flex;min-width:0;flex-direction:column;gap:5px;text-align:left}
+.domino-center-notice-copy b{
+ color:var(--notice-accent);font-size:clamp(16px,2.5vw,21px);font-weight:1000;
+ letter-spacing:1px;line-height:1.05;text-shadow:0 2px 12px color-mix(in srgb,var(--notice-accent) 33%,transparent);
+}
+.domino-center-notice-copy small{color:#e3e9d9;font-size:10px;line-height:1.4}
+.domino-center-notice-shine{
+ position:absolute;top:-60%;left:-40%;width:24%;height:220%;transform:rotate(24deg);
+ background:linear-gradient(90deg,transparent,#ffffff20,transparent);
+ animation:dominoNoticeShine 1.45s ease-out both;pointer-events:none;
+}
+@keyframes dominoCenterNoticeIn{
+ 0%{opacity:0;transform:translate(-50%,-42%) scale(.88);filter:blur(3px)}
+ 70%{opacity:1;transform:translate(-50%,-52%) scale(1.025);filter:blur(0)}
+ 100%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+}
+@keyframes dominoNoticeIconPulse{
+ 0%,100%{transform:scale(1) rotate(0);filter:brightness(1)}
+ 50%{transform:scale(1.08) rotate(-4deg);filter:brightness(1.2)}
+}
+@keyframes dominoNoticeShine{
+ 0%{left:-40%;opacity:0}
+ 24%{opacity:1}
+ 100%{left:125%;opacity:0}
+}
+@media(max-width:620px){
+ .domino-center-notice{width:calc(100% - 18px);min-height:74px;padding:11px 12px;gap:9px;border-radius:15px}
+ .domino-center-notice-icon{flex-basis:40px;width:40px;height:40px;border-radius:12px;font-size:21px}
+ .domino-center-notice-copy b{font-size:16px}
+ .domino-center-notice-copy small{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){
+ .domino-center-notice,.domino-center-notice-icon,.domino-center-notice-shine{animation:none!important}
+}
 </style>
 </head>
 <body>
@@ -1436,7 +1503,7 @@
     <button class="randomize-btn" id="randomizeBtn" type="button">⤨ Sorpréndeme · Aleatorio</button>
    </aside>
   </div>
-  <footer class="creator-footer"><span>SIM CUBA <b>0.70</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
+  <footer class="creator-footer"><span>SIM CUBA <b>0.71</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
  </div>
 </div>
 <script>
@@ -1526,7 +1593,7 @@ const needs={hunger:82,energy:86,hygiene:90,fun:68,social:55,health:100};
 const inventory={bread:0,snack:0,meal:0,juice:0};
 const dominoStats={wins:0,losses:0,draws:0};
 let job=null,needAccumulator=0,autosaveMinutes=0,quest={bought:false,employed:false,worked:false},nearbyContext=null,pendingInteraction=null;
-let activeWorkShift=null,dominoGame=null,dominoAiTimer=null,dominoPassTimer=null,dominoGameSerial=0;
+let activeWorkShift=null,dominoGame=null,dominoAiTimer=null,dominoPassTimer=null,dominoNoticeTimer=null,dominoNoticeSerial=0,dominoGameSerial=0;
 const SAVE_KEY='simcuba.save.v021'; // Mantiene compatibilidad con partidas anteriores
 const AUTO_START_KEY='simcuba.autostart.v1';
 const MOVE_SPEED=2.8; // unidades del mundo por segundo; velocidad continua independiente del zoom
@@ -2758,6 +2825,8 @@ function closeGamePanel(){
  if(activeWorkShift){activeWorkShift=null;toast('Turno cancelado. No se realizó el pago.')}
  if(dominoAiTimer){clearTimeout(dominoAiTimer);dominoAiTimer=null}
  if(dominoPassTimer){clearTimeout(dominoPassTimer);dominoPassTimer=null}
+ if(dominoNoticeTimer){clearTimeout(dominoNoticeTimer);dominoNoticeTimer=null}
+ dominoNoticeSerial++;
  if(dominoGame)dominoGame=null
  const modal=$('gameModal'),panel=$('gamePanel');if(!modal||!panel)return;
  if(panel.classList.contains('phone-mode')&&!modal.classList.contains('hidden')){
@@ -3112,6 +3181,7 @@ function dominoRender(){
   '<div class="domino-scorebar"><span class="domino-turn-badge '+(g.turn==='ai'?'is-ai':g.status==='finished'?'is-finished':'is-player')+'">'+turnLabel+'</span><span class="domino-score-stat">PASES SEGUIDOS <b>'+g.passCount+'/2</b></span><span class="domino-score-stat">FICHAS EN MESA <b>'+g.board.length+'</b></span></div>'+
   '<div class="domino-table-shell"><div class="domino-table-felt">'+
    '<div class="domino-table-caption"><span>✦ MESA DE DOMINÓ</span><span>INICIO EN EL CENTRO · DOBLE SEIS</span></div>'+
+   (g.centerNotice?'<div class="domino-center-notice is-'+g.centerNotice.type+'" role="status" aria-live="polite"><span class="domino-center-notice-icon">'+g.centerNotice.icon+'</span><span class="domino-center-notice-copy"><b>'+escapeHTML(g.centerNotice.title)+'</b><small>'+escapeHTML(g.centerNotice.detail)+'</small></span><i class="domino-center-notice-shine"></i></div>':'')+
    '<div class="domino-seat domino-seat-ai'+(g.turn==='ai'?' is-active':'')+'"><div class="domino-seat-avatar">🤖</div><div class="domino-seat-copy"><b>RIVAL · IA</b><small>'+(g.status==='opening'&&g.turn==='ai'?'Va a abrir la partida':g.turn==='ai'?'Está pensando…':'Esperando su turno')+'</small></div><div class="domino-ai-hand-back">'+aiBacks+'<b>'+g.ai.length+' / 7 fichas</b></div></div>'+
    '<div class="domino-board-scroll"><div class="domino-chain">'+chain+'</div></div>'+
    '<div class="domino-board-ends">'+
@@ -3127,6 +3197,21 @@ function dominoRender(){
  const boardScroll=list.querySelector('.domino-board-scroll');
  if(boardScroll&&g.lastMove)boardScroll.scrollTop=g.lastMove.side==='left'?0:g.lastMove.side==='right'?boardScroll.scrollHeight:boardScroll.scrollHeight/2;
  g.lastMove=null;
+}
+function dominoShowCenterNotice(title,detail,type='pass',duration=1900){
+ const g=dominoGame;if(!g)return;
+ if(dominoNoticeTimer){clearTimeout(dominoNoticeTimer);dominoNoticeTimer=null}
+ const icons={pass:'↪','ai-pass':'…',win:'🏆',loss:'✕',draw:'🤝'};
+ const safeType=Object.prototype.hasOwnProperty.call(icons,type)?type:'pass';
+ const token=++dominoNoticeSerial;
+ g.centerNotice={title,detail,type:safeType,icon:icons[safeType]};
+ dominoRender();
+ if(duration>0){
+  dominoNoticeTimer=setTimeout(()=>{
+   if(dominoGame!==g||dominoNoticeSerial!==token)return;
+   dominoNoticeTimer=null;g.centerNotice=null;dominoRender();
+  },duration);
+ }
 }
 function dominoOpenWithTile(tileId,actor){
  const g=dominoGame;if(!g||g.status!=='opening'||g.turn!==actor)return false;
@@ -3162,7 +3247,9 @@ function dominoFinish(result,reason='empty'){
  }
  g.result=result;
  advanceGameMinutes(30);
- saveGame();dominoRender();
+ saveGame();
+ const resultTitle=result==='win'?'¡GANASTE!':result==='loss'?'¡PERDISTE!':'¡EMPATE!';
+ dominoShowCenterNotice(resultTitle,g.resultText,result,0);
 }
 function dominoCheckBlocked(){
  if(!dominoGame||dominoGame.passCount<2)return false;
@@ -3246,7 +3333,8 @@ function dominoPassPlayer(){
  g.passCount++;
  g.pendingTile=null;g.turn='ai';g.statusText='No tenías una ficha válida y pasaste turno. La IA juega ahora.';
  if(dominoCheckBlocked())return;
- dominoRender();scheduleDominoAi();
+ dominoShowCenterNotice('¡TE PASASTE!','No tienes una ficha que encaje. Ahora juega la IA.','pass',1750);
+ scheduleDominoAi();
 }
 function dominoAiTurn(){
  const g=dominoGame;if(!g||g.turn!=='ai')return;
@@ -3262,6 +3350,7 @@ function dominoAiTurn(){
  if(!dominoHasMove(g.ai)){
   g.passCount++;g.turn='player';g.statusText='La IA no puede jugar y pasó turno. Ahora te toca a ti.';
   if(dominoCheckBlocked())return;
+  dominoShowCenterNotice('¡LA IA SE PASÓ!','La IA no tiene una ficha válida. Ahora te toca.','ai-pass',1500);
   dominoScheduleAutoPass();return;
  }
  const choices=[];
@@ -3289,6 +3378,8 @@ function scheduleDominoAi(){
 function startDominoGame(){
  if(dominoAiTimer){clearTimeout(dominoAiTimer);dominoAiTimer=null}
  if(dominoPassTimer){clearTimeout(dominoPassTimer);dominoPassTimer=null}
+ if(dominoNoticeTimer){clearTimeout(dominoNoticeTimer);dominoNoticeTimer=null}
+ dominoNoticeSerial++;
  const deck=[];let id=0;
  for(let a=0;a<=6;a++)for(let b=a;b<=6;b++)deck.push({id:id++,a:a,b:b});
  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]]}
