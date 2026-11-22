@@ -841,6 +841,9 @@
 .domino-chain{display:flex;flex-direction:column;justify-content:center;gap:9px;min-height:112px;padding:7px 2px}
 .domino-chain-row{position:relative;display:flex;justify-content:flex-start;align-items:center;gap:4px;min-height:38px}
 .domino-chain-row.is-reversed{justify-content:flex-end}
+.domino-chain-turn{height:8px;line-height:8px;color:#ddc98d99;font-size:13px;font-weight:900}
+.domino-chain-turn.from-right{text-align:right;padding-right:13px}
+.domino-chain-turn.from-left{text-align:left;padding-left:13px}
 .domino-empty{display:block;width:100%;padding:25px 10px;text-align:center;color:#a9c2ad;font-size:10px}
 .domino-piece{display:flex;flex:none;align-items:stretch;justify-content:center;overflow:hidden;border:1px solid #d7cdb0;border-radius:5px;background:linear-gradient(145deg,#fff8e8,#ded4b8);color:#26372c;box-shadow:0 2px 5px #00150f99,inset 0 1px #ffffffd9}
 .domino-chain-piece{width:57px;height:35px}
@@ -2670,6 +2673,7 @@ function dominoRender(){
    return '<div class="domino-piece domino-chain-piece'+fresh+'" aria-label="Ficha '+t.a+' y '+t.b+'">'+dominoFaceMarkup(t)+'</div>';
   }).join('');
   rows.push('<div class="domino-chain-row'+(reversed?' is-reversed':'')+'">'+tiles+'</div>');
+  if(start+columns<g.board.length)rows.push('<div class="domino-chain-turn '+(reversed?'from-left':'from-right')+'">'+(reversed?'↘':'↙')+'</div>');
  }
  const chain=rows.join('')||'<div class="domino-empty">La mesa está esperando la primera ficha.</div>';
  const aiBacks=Array.from({length:Math.min(5,g.ai.length)},(_,i)=>'<span class="domino-back-card" style="--card-index:'+i+'"></span>').join('');
