@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b27">
 <meta name="description" content="SIM Cuba: simulador de vida 3D low-poly ambientado en Cuba, con creador visual de personajes y ciudad explorable.">
-<title>SIM Cuba — Comercios, empleo y dominó 0.73</title>
+<title>SIM Cuba — Comercios, empleo y dominó 0.74</title>
 <style>
 :root{color-scheme:dark;--cream:#f2e8cc;--muted:#b6c6b7;--green:#a7cf8a;--gold:#e6c779;--line:#ffffff30}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172b27;color:var(--cream);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:#29413a;border-radius:10px;padding:10px 13px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -1426,6 +1426,34 @@
  .domino-finish-actions>span{max-width:none;text-align:center}
  .domino-finish-actions .domino-mode-start{width:100%}
 }
+
+/* SIM Cuba 0.74 — separación segura de fichas y apertura girada */
+.domino-arm-layout .domino-turn-row{
+ flex:0 0 var(--turn-row-height);
+ height:var(--turn-row-height);
+ min-height:var(--turn-row-height);
+}
+.domino-board-origin{
+ flex:0 0 var(--origin-box-height);
+ height:var(--origin-box-height);
+ min-height:var(--origin-box-height);
+}
+.domino-board-origin .domino-chain-piece.is-origin-rotated{
+ display:flex;
+ flex:0 0 var(--origin-tile-width);
+ width:var(--origin-tile-width);
+ min-width:var(--origin-tile-width);
+ height:var(--origin-tile-height);
+ min-height:var(--origin-tile-height);
+ transform:rotate(90deg);
+}
+.domino-board-origin.is-opening .domino-opening-slot{
+ width:var(--origin-box-width);
+ height:var(--origin-box-height);
+ min-width:var(--origin-box-width);
+ min-height:var(--origin-box-height);
+}
+
 </style>
 </head>
 <body>
@@ -1616,7 +1644,7 @@
     <button class="randomize-btn" id="randomizeBtn" type="button">⤨ Sorpréndeme · Aleatorio</button>
    </aside>
   </div>
-  <footer class="creator-footer"><span>SIM CUBA <b>0.73</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
+  <footer class="creator-footer"><span>SIM CUBA <b>0.74</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
  </div>
 </div>
 <script>
@@ -3196,13 +3224,18 @@ function dominoBoardEndMarkup(side,value,selectable){
 function dominoArmMarkup(tiles,side,originIsDouble=false){
  if(!tiles.length)return '<div class="domino-arm-empty">'+(side==='left'?'←':'→')+'</div>';
  const mobile=window.innerWidth<=620;
- const cfg=mobile?{tileW:38,tileH:28,gap:0,columns:2}:{tileW:54,tileH:39,gap:0,columns:4};
- const {tileW,tileH,gap,columns}=cfg;
- const centerInset=originIsDouble?(mobile?29:47):(mobile?22:39);
+ const cfg=mobile
+  ?{tileW:38,tileH:28,gap:4,rowGap:5,columns:2,centerWidth:96}
+  :{tileW:54,tileH:39,gap:5,rowGap:6,columns:4,centerWidth:136};
+ const {tileW,tileH,gap,rowGap,columns,centerWidth}=cfg;
+ // La ficha inicial está girada: centramos cada brazo contra su borde, dejando separación visible.
+ const centerInset=Math.max(0,(centerWidth-tileH)/2-gap);
+ const turnRowHeight=tileW-tileH/2+rowGap;
  let html='',cursor=0,row=0,nextAnchor=null,nextStartsAtLeft=false;
  while(cursor<tiles.length){
   const part=tiles.slice(cursor,cursor+columns);cursor+=part.length;
-  const runWidth=part.reduce((width,t)=>width+(t.a===t.b?tileH:tileW),0)+(part.length-1)*gap;
+  // Todas las fichas horizontales ocupan el mismo ancho, incluidas las dobles.
+  const runWidth=part.length*tileW+(part.length-1)*gap;
   const runsFromCenter=(side==='left')?(row%2===0):(row%2===1);
   const ordered=runsFromCenter?part.slice().reverse():part;
   const markup=ordered.map(t=>{
@@ -3215,7 +3248,7 @@ function dominoArmMarkup(tiles,side,originIsDouble=false){
     ?'calc(100% + '+centerInset+'px - '+runWidth+'px)'
     :'calc(0px - '+centerInset+'px)';
   }else{
-   // La fila nueva parte del centro del giro anterior, no de la ficha inicial.
+   // La fila parte justo en el borde libre del giro anterior; no invade esa ficha.
    runLeft=nextStartsAtLeft?nextAnchor:'calc('+nextAnchor+' - '+runWidth+'px)';
   }
   html+='<div class="domino-chain-row" style="--run-left:'+runLeft+';--run-width:'+runWidth+'px;--tile-gap:'+gap+'px">'+markup+'</div>';
@@ -3225,14 +3258,11 @@ function dominoArmMarkup(tiles,side,originIsDouble=false){
    const turnLeft=turnAtLeft?'calc('+runLeft+' - '+tileH+'px)':'calc('+runLeft+' + '+runWidth+'px)';
    const linkLeft=turnAtLeft?'calc('+runLeft+' - '+(tileH/2)+'px)':'calc('+runLeft+' + '+runWidth+'px)';
    const fresh=dominoGame.lastMove&&dominoGame.lastMove.id===turn.id?' is-new':'';
-   html+='<div class="domino-turn-row" style="--tile-w:'+tileW+'px;--tile-h:'+tileH+'px;--turn-left:'+turnLeft+';--turn-link-left:'+linkLeft+';--turn-link-width:'+(tileH/2)+'px">'+
+   html+='<div class="domino-turn-row" style="--tile-w:'+tileW+'px;--tile-h:'+tileH+'px;--turn-row-height:'+turnRowHeight+'px;--turn-left:'+turnLeft+';--turn-link-left:'+linkLeft+';--turn-link-width:'+(tileH/2)+'px">'+
     '<i class="domino-turn-link is-entry"></i><i class="domino-turn-link is-exit"></i>'+
     '<div class="domino-piece domino-chain-piece is-vertical'+(turn.a===turn.b?' is-double':'')+fresh+'" aria-label="Ficha de giro '+turn.a+' y '+turn.b+'">'+dominoTurnFaceMarkup(turn,side)+'</div></div>';
-   // Si el giro está a la izquierda, la próxima fila sale hacia la derecha desde su centro.
-   // Si está a la derecha, la próxima fila vuelve hacia la izquierda hasta ese mismo centro.
-   nextAnchor=turnAtLeft
-    ?'calc('+runLeft+' - '+(tileH/2)+'px)'
-    :'calc('+runLeft+' + '+runWidth+'px + '+(tileH/2)+'px)';
+   // La siguiente fila comienza en el borde opuesto del giro, sin solaparse con él.
+   nextAnchor=turnAtLeft?runLeft:'calc('+runLeft+' + '+runWidth+'px)';
    nextStartsAtLeft=turnAtLeft;
   }
   row++;
@@ -3308,9 +3338,12 @@ function dominoRender(){
  const origin=originIndex>=0?g.board[originIndex]:null;
  const leftTiles=originIndex>=0?g.board.slice(0,originIndex).reverse():[];
  const rightTiles=originIndex>=0?g.board.slice(originIndex+1):[];
+ const originMobile=window.innerWidth<=620;
+ const originTileW=originMobile?38:54,originTileH=originMobile?28:39;
+ const originBoxStyle='--origin-box-width:'+originTileH+'px;--origin-box-height:'+originTileW+'px;--origin-tile-width:'+originTileW+'px;--origin-tile-height:'+originTileH+'px';
  const originMarkup=origin
-  ?'<div class="domino-board-origin"><small>INICIO</small><div class="domino-piece domino-chain-piece'+(origin.a===origin.b?' is-double':'')+'">'+dominoFaceMarkup(origin)+'</div></div>'
-  :'<div class="domino-board-origin is-opening"><small>FICHA INICIAL</small><div class="domino-opening-slot">'+(g.status==='opening'?'COLOCA AQUÍ':'ESPERANDO')+'</div></div>';
+  ?'<div class="domino-board-origin" style="'+originBoxStyle+'"><small>INICIO</small><div class="domino-piece domino-chain-piece is-origin-rotated'+(origin.a===origin.b?' is-double':'')+'">'+dominoFaceMarkup(origin)+'</div></div>'
+  :'<div class="domino-board-origin is-opening" style="'+originBoxStyle+'"><small>FICHA INICIAL</small><div class="domino-opening-slot">'+(g.status==='opening'?'COLOCA AQUÍ':'ESPERANDO')+'</div></div>';
  const chain='<div class="domino-board-center">'+
   '<div class="domino-arm domino-arm-left">'+dominoArmMarkup(leftTiles,'left',!!origin&&origin.a===origin.b)+'</div>'+
   originMarkup+
