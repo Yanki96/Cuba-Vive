@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b27">
 <meta name="description" content="SIM Cuba: simulador de vida 3D low-poly ambientado en Cuba, con creador visual de personajes y ciudad explorable.">
-<title>SIM Cuba — Comercios, empleo y dominó 0.69</title>
+<title>SIM Cuba — Comercios, empleo y dominó 0.70</title>
 <style>
 :root{color-scheme:dark;--cream:#f2e8cc;--muted:#b6c6b7;--green:#a7cf8a;--gold:#e6c779;--line:#ffffff30}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172b27;color:var(--cream);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:#29413a;border-radius:10px;padding:10px 13px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -1179,6 +1179,73 @@
 @media(prefers-reduced-motion:reduce){
  .domino-auto-pass,.domino-auto-pass-icon,.domino-auto-pass-glint{animation:none!important}
 }
+
+/* SIM Cuba 0.70 — dobles verticales, proporcionados y alineados al centro */
+.domino-arm-layout .domino-chain-row .domino-chain-piece.is-double:not(.is-vertical){
+ flex:0 0 var(--tile-h);
+ width:var(--tile-h);
+ min-width:var(--tile-h);
+ max-width:var(--tile-h);
+ height:var(--tile-w);
+ align-self:center;
+ flex-direction:column;
+}
+.domino-arm-layout .domino-chain-row .domino-chain-piece.is-double:not(.is-vertical) .domino-half{
+ display:grid;
+ flex:1 1 50%;
+ width:100%;
+ height:50%;
+ min-height:0;
+ padding:2px;
+ box-sizing:border-box;
+}
+.domino-arm-layout .domino-chain-row .domino-chain-piece.is-double:not(.is-vertical) .domino-divider{
+ flex:0 0 2px;
+ width:78%;
+ min-width:0;
+ height:2px;
+ min-height:2px;
+ align-self:center;
+}
+.domino-board-origin .domino-chain-piece.is-double{
+ flex:0 0 42px;
+ width:42px;
+ min-width:42px;
+ height:58px;
+ flex-direction:column;
+}
+.domino-board-origin .domino-chain-piece.is-double .domino-half{
+ display:grid;
+ flex:1 1 50%;
+ width:100%;
+ height:50%;
+ min-height:0;
+ padding:2px;
+ box-sizing:border-box;
+}
+.domino-board-origin .domino-chain-piece.is-double .domino-divider{
+ flex:0 0 2px;
+ width:78%;
+ min-width:0;
+ height:2px;
+ min-height:2px;
+ align-self:center;
+}
+@media(max-width:620px){
+ .domino-arm-layout .domino-chain-row .domino-chain-piece.is-double:not(.is-vertical){
+  flex-basis:28px;
+  width:28px;
+  min-width:28px;
+  max-width:28px;
+  height:38px;
+ }
+ .domino-board-origin .domino-chain-piece.is-double{
+  flex-basis:38px;
+  width:38px;
+  min-width:38px;
+  height:52px;
+ }
+}
 </style>
 </head>
 <body>
@@ -1369,7 +1436,7 @@
     <button class="randomize-btn" id="randomizeBtn" type="button">⤨ Sorpréndeme · Aleatorio</button>
    </aside>
   </div>
-  <footer class="creator-footer"><span>SIM CUBA <b>0.69</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
+  <footer class="creator-footer"><span>SIM CUBA <b>0.70</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
  </div>
 </div>
 <script>
@@ -2943,20 +3010,21 @@ function dominoBoardEndMarkup(side,value,selectable){
  }
  return '<span class="domino-board-end-value"><small>'+label+'</small><span class="domino-end-face">'+pip+'</span><b>'+value+'</b></span>';
 }
-function dominoArmMarkup(tiles,side){
+function dominoArmMarkup(tiles,side,originIsDouble=false){
  if(!tiles.length)return '<div class="domino-arm-empty">'+(side==='left'?'←':'→')+'</div>';
  const mobile=window.innerWidth<=620;
- const cfg=mobile?{tileW:38,tileH:28,gap:0,columns:2,centerInset:22}:{tileW:54,tileH:39,gap:0,columns:4,centerInset:39};
- const {tileW,tileH,gap,columns,centerInset}=cfg;
+ const cfg=mobile?{tileW:38,tileH:28,gap:0,columns:2}:{tileW:54,tileH:39,gap:0,columns:4};
+ const {tileW,tileH,gap,columns}=cfg;
+ const centerInset=originIsDouble?(mobile?29:47):(mobile?22:39);
  let html='',cursor=0,row=0,nextAnchor=null,nextStartsAtLeft=false;
  while(cursor<tiles.length){
   const part=tiles.slice(cursor,cursor+columns);cursor+=part.length;
-  const runWidth=part.length*tileW+(part.length-1)*gap;
+  const runWidth=part.reduce((width,t)=>width+(t.a===t.b?tileH:tileW),0)+(part.length-1)*gap;
   const runsFromCenter=(side==='left')?(row%2===0):(row%2===1);
   const ordered=runsFromCenter?part.slice().reverse():part;
   const markup=ordered.map(t=>{
    const fresh=dominoGame.lastMove&&dominoGame.lastMove.id===t.id?' is-new':'';
-   return '<div class="domino-piece domino-chain-piece '+(side==='left'?'is-left-arm':'is-right-arm')+fresh+'" aria-label="Ficha '+t.a+' y '+t.b+'">'+dominoArmFaceMarkup(t,side,row)+'</div>';
+   return '<div class="domino-piece domino-chain-piece '+(t.a===t.b?'is-double ':'')+(side==='left'?'is-left-arm':'is-right-arm')+fresh+'" aria-label="Ficha '+t.a+' y '+t.b+'">'+dominoArmFaceMarkup(t,side,row)+'</div>';
   }).join('');
   let runLeft;
   if(row===0){
@@ -2976,7 +3044,7 @@ function dominoArmMarkup(tiles,side){
    const fresh=dominoGame.lastMove&&dominoGame.lastMove.id===turn.id?' is-new':'';
    html+='<div class="domino-turn-row" style="--tile-w:'+tileW+'px;--tile-h:'+tileH+'px;--turn-left:'+turnLeft+';--turn-link-left:'+linkLeft+';--turn-link-width:'+(tileH/2)+'px">'+
     '<i class="domino-turn-link is-entry"></i><i class="domino-turn-link is-exit"></i>'+
-    '<div class="domino-piece domino-chain-piece is-vertical'+fresh+'" aria-label="Ficha de giro '+turn.a+' y '+turn.b+'">'+dominoTurnFaceMarkup(turn,side)+'</div></div>';
+    '<div class="domino-piece domino-chain-piece is-vertical'+(turn.a===turn.b?' is-double':'')+fresh+'" aria-label="Ficha de giro '+turn.a+' y '+turn.b+'">'+dominoTurnFaceMarkup(turn,side)+'</div></div>';
    // Si el giro está a la izquierda, la próxima fila sale hacia la derecha desde su centro.
    // Si está a la derecha, la próxima fila vuelve hacia la izquierda hasta ese mismo centro.
    nextAnchor=turnAtLeft
@@ -3005,12 +3073,12 @@ function dominoRender(){
  const leftTiles=originIndex>=0?g.board.slice(0,originIndex).reverse():[];
  const rightTiles=originIndex>=0?g.board.slice(originIndex+1):[];
  const originMarkup=origin
-  ?'<div class="domino-board-origin"><small>INICIO</small><div class="domino-piece domino-chain-piece">'+dominoFaceMarkup(origin)+'</div></div>'
+  ?'<div class="domino-board-origin"><small>INICIO</small><div class="domino-piece domino-chain-piece'+(origin.a===origin.b?' is-double':'')+'">'+dominoFaceMarkup(origin)+'</div></div>'
   :'<div class="domino-board-origin is-opening"><small>FICHA INICIAL</small><div class="domino-opening-slot">'+(g.status==='opening'?'COLOCA AQUÍ':'ESPERANDO')+'</div></div>';
  const chain='<div class="domino-board-center">'+
-  '<div class="domino-arm domino-arm-left">'+dominoArmMarkup(leftTiles,'left')+'</div>'+
+  '<div class="domino-arm domino-arm-left">'+dominoArmMarkup(leftTiles,'left',!!origin&&origin.a===origin.b)+'</div>'+
   originMarkup+
-  '<div class="domino-arm domino-arm-right">'+dominoArmMarkup(rightTiles,'right')+'</div>'+
+  '<div class="domino-arm domino-arm-right">'+dominoArmMarkup(rightTiles,'right',!!origin&&origin.a===origin.b)+'</div>'+
  '</div>';
  const aiBacks=Array.from({length:Math.min(7,g.ai.length)},(_,i)=>'<span class="domino-back-card" style="--card-index:'+i+'"></span>').join('');
  const playerTiles=g.player.map(t=>{
