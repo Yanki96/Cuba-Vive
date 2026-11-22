@@ -2503,6 +2503,7 @@ function openWorkShiftPanel(){
 function beginWorkShift(){
  if(activeWorkShift){toast('Ya tienes un turno en curso.');return}
  if(!job){toast('Primero necesitas conseguir un empleo.');return}
+ stopWalking();
  const hour=Math.floor(minutes/60);
  if(hour<7||hour>=18){toast('El turno está disponible entre las 7:00 y las 18:00.');return}
  if(needs.energy<22||needs.hunger<15){toast('Estás demasiado cansado o tienes demasiada hambre para trabajar.');return}
@@ -2628,12 +2629,13 @@ function dominoApplyTile(tileId,side,actor){
  if(index<0)return false;
  const tile=hand[index],end=side==='left'?g.leftEnd:g.rightEnd;
  if(end!==null&&tile.a!==end&&tile.b!==end)return false;
- let other=tile.a;
- if(end===null){other=tile.b;g.leftEnd=tile.a;g.rightEnd=tile.b;g.board.push({a:tile.a,b:tile.b})}
- else{
-  other=tile.a===end?tile.b:tile.a;
-  if(side==='left'){g.leftEnd=other;g.board.unshift({a:tile.a,b:tile.b})}
-  else{g.rightEnd=other;g.board.push({a:tile.a,b:tile.b})}
+ if(end===null){g.leftEnd=tile.a;g.rightEnd=tile.b;g.board.push({a:tile.a,b:tile.b})}
+ else if(side==='left'){
+  const display=tile.a===end?{a:tile.b,b:tile.a}:{a:tile.a,b:tile.b};
+  g.leftEnd=display.a;g.board.unshift(display);
+ }else{
+  const display=tile.a===end?{a:tile.a,b:tile.b}:{a:tile.b,b:tile.a};
+  g.rightEnd=display.b;g.board.push(display);
  }
  hand.splice(index,1);g.pendingTile=null;g.statusText=actor==='player'?'Ficha colocada.':'La IA colocó una ficha.';
  dominoAfterMove(actor);
@@ -2696,7 +2698,7 @@ function startDominoGame(){
  for(let a=0;a<=6;a++)for(let b=a;b<=6;b++)deck.push({id:id++,a:a,b:b});
  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]]}
  const playerHand=deck.slice(0,7),aiHand=deck.slice(7,14),stock=deck.slice(14);
- const openerOwner='player',all=playerHand.map(t=>({tile:t,owner:'player'})).concat(aiHand.map(t=>({tile:t,owner:'ai'})));
+ const all=playerHand.map(t=>({tile:t,owner:'player'})).concat(aiHand.map(t=>({tile:t,owner:'ai'})));
  const doubles=all.filter(x=>x.tile.a===x.tile.b);
  const candidates=doubles.length?doubles:all;
  candidates.sort((x,y)=>(y.tile.a+y.tile.b)-(x.tile.a+x.tile.b));
@@ -2736,7 +2738,7 @@ function performGameAction(id){
  const foods={bread:{cost:90,hunger:22,fun:0,label:'Pan con tortilla'},snack:{cost:110,hunger:18,fun:5,label:'Bocadito'},meal:{cost:220,hunger:48,fun:8,label:'Plato del día'},juice:{cost:65,hunger:7,fun:12,label:'Jugo'}};
  if(id.startsWith('buy-')){const key=id.slice(4),f=foods[key];if(!f)return;if(cash<f.cost){toast('No tienes dinero suficiente.');return}cash-=f.cost;inventory[key]++;finishQuest('bought',100,'¡Primera compra completada!');close();toast(`Compraste ${f.label}. Revisa tu mochila.`);saveGame();return}
  if(id==='apply-job'){
-  const current=getNearbyInteractable(),style=current?.obj?.style||'shop';let title='Auxiliar de comercio',pay=420;
+  const current=currentInteractionTarget||getNearbyInteractable(),style=current?.obj?.style||'shop';let title='Auxiliar de comercio',pay=420;
   if(style==='bodega'||style==='market'){title='Dependiente de bodega';pay=430}
   else if(['cafe','bakery','restaurant'].includes(style)){title='Ayudante de cafetería';pay=500}
   else if(['workshop','garage'].includes(style)){title='Ayudante de taller';pay=540}
