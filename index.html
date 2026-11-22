@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b27">
 <meta name="description" content="SIM Cuba: simulador de vida 3D low-poly ambientado en Cuba, con creador visual de personajes y ciudad explorable.">
-<title>SIM Cuba — Near y far extendidos 0.53</title>
+<title>SIM Cuba — Planos near/far fijos 0.54</title>
 <style>
 :root{color-scheme:dark;--cream:#f2e8cc;--muted:#b6c6b7;--green:#a7cf8a;--gold:#e6c779;--line:#ffffff30}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172b27;color:var(--cream);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:#29413a;border-radius:10px;padding:10px 13px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -721,7 +721,7 @@
 }
 
 
-/* SIM Cuba 0.53 — mayor margen de near/far sin alterar el zoom */
+/* SIM Cuba 0.54 — near/far fijos e independientes del zoom */
 .game-panel:not(.phone-mode){width:min(460px,calc(100vw - 28px));padding:15px}
 .game-action-list{gap:7px;margin-top:12px}
 .game-action{min-height:57px;padding:8px 9px;gap:8px}
@@ -931,7 +931,7 @@
     <button class="randomize-btn" id="randomizeBtn" type="button">⤨ Sorpréndeme · Aleatorio</button>
    </aside>
   </div>
-  <footer class="creator-footer"><span>SIM CUBA <b>0.53</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
+  <footer class="creator-footer"><span>SIM CUBA <b>0.54</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
  </div>
 </div>
 <script>
@@ -1447,22 +1447,12 @@ function setupCamera(){
  const aspect=W/Math.max(1,H),baseHalfH=aspect<.78?12.2:10.4,halfH=baseHalfH/cameraZoom,halfW=halfH*aspect;
  // El plano lejano aumenta con el radio visible de la cámara (alto y ancho),
  // por lo que una pantalla panorámica o un zoom más abierto obtiene más alcance.
- const baseViewRadius=Math.hypot(baseHalfH*aspect,baseHalfH);
- const viewRadius=Math.hypot(halfW,halfH);
- // Calcula el rango de profundidad real usando las ocho esquinas del volumen
- // completo del mundo (terreno ±110 y elementos de hasta 7 unidades de altura).
- // Así ningún extremo del mapa queda fuera del plano Far al mover la cámara.
- const viewBounds={minX:-110,maxX:110,minY:-1,maxY:7,minZ:-110,maxZ:110};
- const cornerDepths=[];
- for(const x of [viewBounds.minX,viewBounds.maxX])
-  for(const y of [viewBounds.minY,viewBounds.maxY])
-   for(const z of [viewBounds.minZ,viewBounds.maxZ])
-    cornerDepths.push(vDot(forward,vSub([x,y,z],eye)));
- // Mantiene un near muy próximo y un far holgado, más allá de todo el
- // terreno de 220x220. El margen evita que el mapa toque los planos de recorte.
- const depthPadding=100;
+ // Límites fijos: no dependen del zoom ni de la relación de aspecto.
+ // El terreno mide 220x220 unidades; far=5000 deja margen de sobra para
+ // todos sus extremos y para el desplazamiento permitido de la cámara.
+ // Near permanece muy pequeño para no cortar objetos próximos.
  const nearClip=.00001;
- const farClip=Math.max(2000,Math.max(...cornerDepths)+depthPadding);
+ const farClip=5000;
  const view=matLookAt(eye,target,[0,1,0]),proj=matOrtho(-halfW,halfW,-halfH,halfH,nearClip,farClip);
  cameraState.target=target;cameraState.eye=eye;cameraState.forward=forward;cameraState.right=right;cameraState.up=up;cameraState.halfH=halfH;cameraState.viewProj=matMul(proj,view);cameraState.ready=true;
 }
