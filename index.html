@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b27">
 <meta name="description" content="SIM Cuba: simulador de vida 3D low-poly ambientado en Cuba, con creador visual de personajes y ciudad explorable.">
-<title>SIM Cuba — Comercios, empleo y dominó 0.71</title>
+<title>SIM Cuba — Comercios, empleo y dominó 0.72</title>
 <style>
 :root{color-scheme:dark;--cream:#f2e8cc;--muted:#b6c6b7;--green:#a7cf8a;--gold:#e6c779;--line:#ffffff30}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172b27;color:var(--cream);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:#29413a;border-radius:10px;padding:10px 13px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -1313,6 +1313,72 @@
 @media(prefers-reduced-motion:reduce){
  .domino-center-notice,.domino-center-notice-icon,.domino-center-notice-shine{animation:none!important}
 }
+
+/* SIM Cuba 0.72 — HUD de modalidades, participantes y fichas iniciales */
+.domino-opponents{
+ position:relative;z-index:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));
+ gap:6px;width:100%;align-items:stretch;
+}
+.domino-opponents .domino-seat{min-width:0;min-height:46px;padding:6px 8px;gap:7px}
+.domino-opponents .domino-seat-avatar{width:30px;height:30px;font-size:16px}
+.domino-opponents .domino-seat-copy b{font-size:8px}
+.domino-opponents .domino-seat-copy small{font-size:7px}
+.domino-opponents .domino-back-card{width:18px;height:27px;margin-left:-7px;border-width:1px}
+.domino-opponents .domino-ai-hand-back{padding-right:2px}
+.domino-opponents .domino-ai-hand-back b{font-size:8px;margin-left:5px;white-space:nowrap}
+.domino-mode-hud{
+ display:flex;flex-direction:column;gap:11px;padding:13px;
+ border:1px solid #d7c77d55;border-radius:15px;
+ background:linear-gradient(145deg,#122d25,#182b25 58%,#10231e);
+ box-shadow:inset 0 1px #ffffff12,0 6px 18px #0002;
+}
+.domino-mode-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.domino-mode-heading>span:first-child{display:flex;flex-direction:column;gap:4px}
+.domino-mode-heading small{font-size:8px;font-weight:950;letter-spacing:1.6px;color:#d8c47e}
+.domino-mode-heading b{font-size:14px;color:#f3ead0}
+.domino-mode-current{padding:6px 9px;border:1px solid #e0cc8155;border-radius:20px;background:#d7c77d16;color:#e9d894;font-size:8px;font-weight:900;white-space:nowrap}
+.domino-mode-groups{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.domino-mode-group{display:flex;flex-direction:column;gap:7px;min-width:0}
+.domino-mode-group>label{font-size:8px;font-weight:950;letter-spacing:1.1px;color:#a9c0ad}
+.domino-mode-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.domino-hand-size-choice{grid-template-columns:repeat(2,minmax(0,1fr))}
+.domino-mode-choice{
+ display:flex;min-width:0;min-height:56px;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+ padding:7px 4px;border:1px solid #ffffff20;border-radius:10px;background:#ffffff08;color:#dfe6d7;
+ transition:background .16s,border-color .16s,transform .16s,box-shadow .16s;
+}
+.domino-mode-choice b{font-size:19px;line-height:1;color:#f2e8cc}
+.domino-mode-choice small{font-size:7px;color:#9fb3a2;text-align:center;line-height:1.2}
+.domino-mode-choice.is-selected{
+ border-color:#e4ce81;background:linear-gradient(145deg,#d8c47735,#a8c98720);
+ box-shadow:inset 0 0 0 1px #e4ce8126,0 0 13px #d6c27a13;
+ transform:translateY(-1px);
+}
+.domino-mode-choice.is-selected b{color:#ffe6a0}
+.domino-mode-choice.is-selected small{color:#d9d8b9}
+.domino-mode-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:9px;border-top:1px solid #ffffff17}
+.domino-mode-footer>span{font-size:8px;color:#9fb3a2;line-height:1.35}
+.domino-mode-start{
+ display:flex;align-items:center;justify-content:center;gap:8px;min-height:39px;padding:9px 14px;
+ border:1px solid #e7d48e;border-radius:10px;background:linear-gradient(110deg,#e2ce84,#b9d38f);
+ color:#20372b;font-size:9px;font-weight:1000;letter-spacing:.65px;
+ box-shadow:0 4px 12px #0003;white-space:nowrap;
+}
+.domino-mode-start:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.domino-mode-start i{font-style:normal;font-size:13px}
+.domino-interface{gap:10px}
+@media(max-width:620px){
+ .domino-opponents{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+ .domino-opponents .domino-seat{padding:5px 6px}
+ .domino-opponents .domino-ai-hand-back .domino-back-card:nth-child(n+3){display:none}
+ .domino-mode-hud{padding:10px;gap:9px}
+ .domino-mode-groups{gap:8px}
+ .domino-mode-choice{min-height:52px}
+ .domino-mode-footer{align-items:stretch;flex-direction:column}
+ .domino-mode-footer>span{text-align:center}
+ .domino-mode-start{width:100%}
+ .domino-mode-current{font-size:7px;padding:5px 7px}
+}
 </style>
 </head>
 <body>
@@ -1503,7 +1569,7 @@
     <button class="randomize-btn" id="randomizeBtn" type="button">⤨ Sorpréndeme · Aleatorio</button>
    </aside>
   </div>
-  <footer class="creator-footer"><span>SIM CUBA <b>0.71</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
+  <footer class="creator-footer"><span>SIM CUBA <b>0.72</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
  </div>
 </div>
 <script>
@@ -1594,6 +1660,7 @@ const inventory={bread:0,snack:0,meal:0,juice:0};
 const dominoStats={wins:0,losses:0,draws:0};
 let job=null,needAccumulator=0,autosaveMinutes=0,quest={bought:false,employed:false,worked:false},nearbyContext=null,pendingInteraction=null;
 let activeWorkShift=null,dominoGame=null,dominoAiTimer=null,dominoPassTimer=null,dominoNoticeTimer=null,dominoNoticeSerial=0,dominoGameSerial=0;
+const dominoConfig={players:2,handSize:7};
 const SAVE_KEY='simcuba.save.v021'; // Mantiene compatibilidad con partidas anteriores
 const AUTO_START_KEY='simcuba.autostart.v1';
 const MOVE_SPEED=2.8; // unidades del mundo por segundo; velocidad continua independiente del zoom
@@ -3050,7 +3117,7 @@ function dominoTileCanPlay(tile){
  return !dominoGame||dominoGame.board.length===0||tile.a===dominoGame.leftEnd||tile.b===dominoGame.leftEnd||tile.a===dominoGame.rightEnd||tile.b===dominoGame.rightEnd;
 }
 function dominoPipsMarkup(value){
- const layouts={0:[],1:[5],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
+ const layouts={0:[],1:[5],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9],7:[1,2,3,5,7,8,9],8:[1,2,3,4,6,7,8,9],9:[1,2,3,4,5,6,7,8,9]};
  const active=layouts[value]||[];
  let dots='';
  for(let i=1;i<=9;i++)dots+='<i'+(active.includes(i)?' class="is-dot"':'')+'></i>';
@@ -3125,6 +3192,39 @@ function dominoArmMarkup(tiles,side,originIsDouble=false){
  }
  return '<div class="domino-arm-layout" style="--tile-w:'+tileW+'px;--tile-h:'+tileH+'px">'+html+'</div>';
 }
+function dominoCurrentSeat(){
+ const g=dominoGame;
+ return g&&g.seats?g.seats[g.currentSeat]:null;
+}
+function dominoSetTurn(index){
+ const g=dominoGame;if(!g||!g.seats.length)return;
+ g.currentSeat=(index+g.seats.length)%g.seats.length;
+ g.turn=g.seats[g.currentSeat].id==='player'?'player':'ai';
+ g.player=g.seats[0].hand;
+ g.ai=g.seats[1]?g.seats[1].hand:[];
+}
+function dominoAdvanceTurn(){
+ const g=dominoGame;if(!g||g.status!=='playing')return;
+ dominoSetTurn(g.currentSeat+1);
+ const seat=dominoCurrentSeat();
+ g.statusText=seat.id==='player'?'Tu turno. Busca una ficha que coincida con los extremos.':seat.name+' está pensando su jugada.';
+ if(seat.id==='player')dominoScheduleAutoPass();
+ else{dominoRender();scheduleDominoAi()}
+}
+function dominoModeHudMarkup(g){
+ const players=dominoConfig.players,handSize=dominoConfig.handSize;
+ const playerOptions=[2,3,4].map(n=>'<button type="button" class="domino-mode-choice'+(players===n?' is-selected':'')+'" data-domino-players="'+n+'" aria-pressed="'+(players===n)+'"><b>'+n+'</b><small>jugadores</small></button>').join('');
+ const handOptions=[7,10].map(n=>'<button type="button" class="domino-mode-choice domino-hand-size-choice'+(handSize===n?' is-selected':'')+'" data-domino-hand-size="'+n+'" aria-pressed="'+(handSize===n)+'"><b>'+n+'</b><small>fichas por jugador</small></button>').join('');
+ const actualSame=players===g.playerCount&&handSize===g.handSize;
+ return '<section class="domino-mode-hud">'+
+  '<div class="domino-mode-heading"><span><small>CONFIGURA LA PARTIDA</small><b>Modo de juego</b></span><span class="domino-mode-current">'+g.playerCount+' JUG. · '+g.handSize+' FICHAS</span></div>'+
+  '<div class="domino-mode-groups">'+
+   '<div class="domino-mode-group"><label>PARTICIPANTES</label><div class="domino-mode-options">'+playerOptions+'</div></div>'+
+   '<div class="domino-mode-group"><label>FICHAS INICIALES</label><div class="domino-mode-options">'+handOptions+'</div></div>'+
+  '</div>'+
+  '<div class="domino-mode-footer"><span>'+(actualSame?'Modo actual seleccionado':'La selección se aplicará al iniciar')+'</span><button type="button" class="domino-mode-start" data-domino-new-game="true">'+(g.status==='finished'?'JUGAR OTRA PARTIDA':'INICIAR NUEVA PARTIDA')+' <i>↗</i></button></div>'+
+ '</section>';
+}
 function dominoRender(){
  if(!dominoGame)return;
  const g=dominoGame,panel=$('gamePanel'),modal=$('gameModal'),list=$('gameActionList');
@@ -3132,7 +3232,9 @@ function dominoRender(){
  modal.classList.remove('phone-modal','phone-modal-enter','phone-modal-exit');
  panel.classList.remove('phone-mode','business-mode','work-mode');
  panel.classList.add('domino-mode');
- $('gamePanelKicker').textContent='DOMINÓ DOBLE SEIS · CONTRA LA IA';
+ const current=dominoCurrentSeat()||g.seats[0],isPlayerTurn=current.id==='player';
+ const setName=g.handSize===10?'DOBLE NUEVE':'DOBLE SEIS';
+ $('gamePanelKicker').textContent='DOMINÓ '+setName+' · '+g.playerCount+' JUGADORES';
  $('gamePanelTitle').textContent=g.status==='finished'?'Resultado de la partida':'Mesa de dominó';
  $('gamePanelDescription').textContent=g.statusText||'Empareja los extremos de la cadena para colocar tus fichas.';
  $('gamePanelFootLeft').textContent='Victorias '+dominoStats.wins+' · Derrotas '+dominoStats.losses+' · Empates '+dominoStats.draws;
@@ -3149,50 +3251,39 @@ function dominoRender(){
   originMarkup+
   '<div class="domino-arm domino-arm-right">'+dominoArmMarkup(rightTiles,'right',!!origin&&origin.a===origin.b)+'</div>'+
  '</div>';
- const aiBacks=Array.from({length:Math.min(7,g.ai.length)},(_,i)=>'<span class="domino-back-card" style="--card-index:'+i+'"></span>').join('');
+ const opponentsMarkup=g.seats.slice(1).map(seat=>{
+  const active=g.seats[g.currentSeat]===seat;
+  const backs=Array.from({length:Math.min(4,seat.hand.length)},(_,i)=>'<span class="domino-back-card" style="--card-index:'+i+'"></span>').join('');
+  const status=active?(g.status==='opening'?'Va a abrir':'Está jugando'):'Esperando turno';
+  return '<div class="domino-seat domino-seat-ai'+(active?' is-active':'')+'">'+
+   '<div class="domino-seat-avatar">🤖</div><div class="domino-seat-copy"><b>'+seat.name+'</b><small>'+status+'</small></div>'+
+   '<div class="domino-ai-hand-back">'+backs+'<b>'+seat.hand.length+' fichas</b></div></div>';
+ }).join('');
  const playerTiles=g.player.map(t=>{
-  const openingChoice=g.status==='opening'&&g.turn==='player';
-  const playable=openingChoice||(g.status==='playing'&&dominoTileCanPlay(t));
+  const openingChoice=g.status==='opening'&&isPlayerTurn;
+  const playable=openingChoice||(g.status==='playing'&&isPlayerTurn&&dominoTileCanPlay(t));
   const choosing=g.pendingTile===t.id;
-  const disabled=g.turn!=='player'||(!openingChoice&&g.status!=='playing')||(!openingChoice&&!dominoTileCanPlay(t))||(g.pendingTile!==null&&!choosing);
+  const disabled=!isPlayerTurn||(!openingChoice&&g.status!=='playing')||(!openingChoice&&!dominoTileCanPlay(t))||(g.pendingTile!==null&&!choosing);
   const selected=choosing?' is-selected is-choosing':'';
   return '<button type="button" class="domino-piece domino-hand-tile'+selected+(playable?' is-playable':'')+'" data-domino-tile="'+t.id+'" aria-label="Ficha '+t.a+' y '+t.b+'" '+(disabled?'disabled':'')+'>'+dominoHandFaceMarkup(t)+'</button>';
  }).join('');
- let controls='';
- if(g.status==='finished'){
-  controls='<div class="domino-result"><b>'+(g.result==='win'?'🏆 ¡Ganaste!':g.result==='loss'?'😕 Ganó la IA':'🤝 Empate')+'</b><span>'+g.resultText+'</span></div>'+
-   '<button type="button" class="domino-primary" data-domino-replay="true">Volver a jugar</button>';
- }else if(g.status==='opening'&&g.turn==='player'){
-  controls='<div class="domino-turn-hint"><b>¡Te toca abrir!</b><span>Elige una de tus 7 fichas para colocar la primera en el centro de la mesa.</span></div>';
- }else if(g.status==='opening'&&g.turn==='ai'){
-  controls='<div class="domino-ai-thinking"><span class="domino-thinking-dots"><i></i><i></i><i></i></span> La IA está eligiendo la ficha inicial…</div>';
- }else if(g.turn==='ai'){
-  controls='<div class="domino-ai-thinking"><span class="domino-thinking-dots"><i></i><i></i><i></i></span> La IA está pensando su jugada…</div>';
- }else if(g.pendingTile!==null){
-  controls='<div class="domino-turn-hint"><b>Elige el extremo de la mesa</b><span>Ahora toca el extremo izquierdo o derecho que ya está colocado en la mesa.</span></div>';
- }else if(!dominoHasMove(g.player)){
-  controls='<div class="domino-auto-pass" role="status" aria-live="polite"><span class="domino-auto-pass-icon">↪</span><span class="domino-auto-pass-copy"><b>¡Te pasaste!</b><small>No tienes una ficha válida. Pasando turno automáticamente…</small></span><i class="domino-auto-pass-glint"></i></div>';
- }else{
-  controls='<div class="domino-turn-hint"><b>Te toca jugar</b><span>Selecciona una ficha que coincida con uno de los extremos de la mesa.</span></div>';
- }
- const turnLabel=g.status==='finished'?'PARTIDA TERMINADA':g.status==='opening'?(g.turn==='ai'?'LA IA ABRE':'TÚ ABRES'):g.turn==='ai'?'TURNO DE LA IA':'TU TURNO';
+ const turnLabel=g.status==='finished'?'PARTIDA TERMINADA':g.status==='opening'?'ABRE '+current.name:'TURNO DE '+current.name;
  const endChoices=g.pendingTile!==null;
  list.innerHTML='<div class="domino-interface">'+
-  '<div class="domino-scorebar"><span class="domino-turn-badge '+(g.turn==='ai'?'is-ai':g.status==='finished'?'is-finished':'is-player')+'">'+turnLabel+'</span><span class="domino-score-stat">PASES SEGUIDOS <b>'+g.passCount+'/2</b></span><span class="domino-score-stat">FICHAS EN MESA <b>'+g.board.length+'</b></span></div>'+
+  '<div class="domino-scorebar"><span class="domino-turn-badge '+(!isPlayerTurn&&g.status!=='finished'?'is-ai':g.status==='finished'?'is-finished':'is-player')+'">'+turnLabel+'</span><span class="domino-score-stat">'+g.playerCount+' JUGADORES · '+g.handSize+' FICHAS</span><span class="domino-score-stat">PASES <b>'+g.passCount+'/'+g.playerCount+'</b> · MESA <b>'+g.board.length+'</b></span></div>'+
   '<div class="domino-table-shell"><div class="domino-table-felt">'+
-   '<div class="domino-table-caption"><span>✦ MESA DE DOMINÓ</span><span>INICIO EN EL CENTRO · DOBLE SEIS</span></div>'+
-   (g.centerNotice?'<div class="domino-center-notice is-'+g.centerNotice.type+'" role="status" aria-live="polite"><span class="domino-center-notice-icon">'+g.centerNotice.icon+'</span><span class="domino-center-notice-copy"><b>'+escapeHTML(g.centerNotice.title)+'</b><small>'+escapeHTML(g.centerNotice.detail)+'</small></span><i class="domino-center-notice-shine"></i></div>':'')+
-   '<div class="domino-seat domino-seat-ai'+(g.turn==='ai'?' is-active':'')+'"><div class="domino-seat-avatar">🤖</div><div class="domino-seat-copy"><b>RIVAL · IA</b><small>'+(g.status==='opening'&&g.turn==='ai'?'Va a abrir la partida':g.turn==='ai'?'Está pensando…':'Esperando su turno')+'</small></div><div class="domino-ai-hand-back">'+aiBacks+'<b>'+g.ai.length+' / 7 fichas</b></div></div>'+
+   '<div class="domino-table-caption"><span>✦ MESA DE DOMINÓ</span><span>INICIO EN EL CENTRO · '+setName+'</span></div>'+
+   '<div class="domino-opponents">'+opponentsMarkup+'</div>'+
    '<div class="domino-board-scroll"><div class="domino-chain">'+chain+'</div></div>'+
    '<div class="domino-board-ends">'+
     dominoBoardEndMarkup('left',g.leftEnd,endChoices)+
-    '<span class="domino-pass-counter"><small>PASES SEGUIDOS</small><b>'+g.passCount+' / 2</b></span>'+
+    '<span class="domino-pass-counter"><small>PASES SEGUIDOS</small><b>'+g.passCount+' / '+g.playerCount+'</b></span>'+
     dominoBoardEndMarkup('right',g.rightEnd,endChoices)+
    '</div>'+
-   '<div class="domino-seat domino-seat-player'+(g.turn==='player'&&g.status!=='finished'?' is-active':'')+'"><div class="domino-seat-avatar">🧑</div><div class="domino-seat-copy"><b>TÚ</b><small>'+(g.status==='opening'&&g.turn==='player'?'Elige la ficha inicial':g.turn==='player'?'Tu turno':'En la mesa')+'</small></div><div class="domino-player-count">'+g.player.length+' fichas</div></div>'+
+   '<div class="domino-seat domino-seat-player'+(isPlayerTurn&&g.status!=='finished'?' is-active':'')+'"><div class="domino-seat-avatar">🧑</div><div class="domino-seat-copy"><b>TÚ</b><small>'+(isPlayerTurn?(g.status==='opening'?'Elige la ficha inicial':'Tu turno'):'En la mesa')+'</small></div><div class="domino-player-count">'+g.player.length+' / '+g.handSize+' fichas</div></div>'+
   '</div></div>'+
-  '<div class="domino-hand-panel"><div class="domino-hand-head"><b>TUS FICHAS · MÁXIMO 7</b><span>'+g.player.length+' / 7</span></div><div class="domino-hand">'+(playerTiles||'<span class="domino-empty">No te quedan fichas.</span>')+'</div></div>'+
-  controls+'</div>';
+  '<div class="domino-hand-panel"><div class="domino-hand-head"><b>TUS FICHAS · '+g.handSize+' POR JUGADOR</b><span>'+g.player.length+' / '+g.handSize+'</span></div><div class="domino-hand">'+(playerTiles||'<span class="domino-empty">No te quedan fichas.</span>')+'</div></div>'+
+  dominoModeHudMarkup(g)+'</div>';
  modal.classList.remove('hidden');
  const boardScroll=list.querySelector('.domino-board-scroll');
  if(boardScroll&&g.lastMove)boardScroll.scrollTop=g.lastMove.side==='left'?0:g.lastMove.side==='right'?boardScroll.scrollHeight:boardScroll.scrollHeight/2;
@@ -3214,35 +3305,40 @@ function dominoShowCenterNotice(title,detail,type='pass',duration=1900){
  }
 }
 function dominoOpenWithTile(tileId,actor){
- const g=dominoGame;if(!g||g.status!=='opening'||g.turn!==actor)return false;
- const hand=actor==='player'?g.player:g.ai,index=hand.findIndex(t=>t.id===tileId);
+ const g=dominoGame,seat=dominoCurrentSeat();
+ if(!g||!seat||g.status!=='opening'||g.turn!==actor)return false;
+ const hand=seat.hand,index=hand.findIndex(t=>t.id===tileId);
  if(index<0)return false;
  const tile=hand.splice(index,1)[0];
  g.board=[{id:tile.id,a:tile.a,b:tile.b}];
  g.openingTileId=tile.id;g.leftEnd=tile.a;g.rightEnd=tile.b;
  g.status='playing';g.pendingTile=null;g.passCount=0;
  g.lastMove={id:tile.id,side:'open'};
- g.turn=actor==='player'?'ai':'player';
- g.statusText=actor==='player'?'Abriste con '+tile.a+'|'+tile.b+'. Ahora juega la IA.':'La IA abrió con '+tile.a+'|'+tile.b+'. Ahora te toca.';
- if(g.turn==='ai'){dominoRender();scheduleDominoAi()}else dominoScheduleAutoPass();
+ dominoSetTurn(g.currentSeat+1);
+ const next=dominoCurrentSeat();
+ g.statusText=next.id==='player'?'Abriste la mesa. Ahora te toca jugar cuando corresponda.':next.name+' juega después de la apertura.';
+ if(next.id==='player')dominoScheduleAutoPass();
+ else{dominoRender();scheduleDominoAi()}
  return true;
 }
-function dominoFinish(result,reason='empty'){
+function dominoFinish(result,reason='empty',winnerSeat=null){
  if(!dominoGame||dominoGame.status==='finished')return;
  const g=dominoGame;g.status='finished';g.autoPassPending=false;
  if(dominoAiTimer){clearTimeout(dominoAiTimer);dominoAiTimer=null}
  if(dominoPassTimer){clearTimeout(dominoPassTimer);dominoPassTimer=null}
  if(result==='win'){
   dominoStats.wins++;
-  g.resultText=reason==='blocked'?'La partida se cerró. Tienes menos puntos en tus fichas que la IA.':'Te quedaste sin fichas antes que la IA.';
+  g.resultText=reason==='blocked'?'La partida se cerró y tienes menos puntos que los rivales.':'Te quedaste sin fichas antes que los demás.';
   changeNeeds({fun:25,social:18,energy:-6});
  }else if(result==='loss'){
   dominoStats.losses++;
-  g.resultText=reason==='blocked'?'La partida se cerró. La IA tiene menos puntos en sus fichas.':'La IA terminó sus fichas antes que tú.';
+  g.resultText=reason==='blocked'
+   ?(winnerSeat?winnerSeat.name+' terminó con menos puntos.':'Un rival terminó con menos puntos.')
+   :(winnerSeat?winnerSeat.name+' terminó sus fichas antes que tú.':'Un rival terminó sus fichas antes que tú.');
   changeNeeds({fun:12,social:8,energy:-6});
  }else{
   dominoStats.draws++;
-  g.resultText='La partida se cerró y ambos jugadores terminaron con la misma cantidad de puntos.';
+  g.resultText=reason==='blocked'?'La partida se cerró con un empate en la menor puntuación.':'La partida terminó en empate.';
   changeNeeds({fun:18,social:12,energy:-4});
  }
  g.result=result;
@@ -3252,45 +3348,48 @@ function dominoFinish(result,reason='empty'){
  dominoShowCenterNotice(resultTitle,g.resultText,result,0);
 }
 function dominoCheckBlocked(){
- if(!dominoGame||dominoGame.passCount<2)return false;
- const playerPoints=dominoPips(dominoGame.player),aiPoints=dominoPips(dominoGame.ai);
- dominoFinish(playerPoints<aiPoints?'win':playerPoints>aiPoints?'loss':'draw','blocked');
+ const g=dominoGame;if(!g||g.passCount<g.seats.length)return false;
+ const totals=g.seats.map(seat=>({seat,points:dominoPips(seat.hand)}));
+ const lowest=Math.min(...totals.map(item=>item.points));
+ const winners=totals.filter(item=>item.points===lowest);
+ const playerAmongWinners=winners.some(item=>item.seat.id==='player');
+ const result=playerAmongWinners?(winners.length===1?'win':'draw'):'loss';
+ dominoFinish(result,'blocked',winners[0].seat);
  return true;
 }
 function dominoAfterMove(actor){
- if(!dominoGame||dominoGame.status!=='playing')return;
- const g=dominoGame,hand=actor==='player'?g.player:g.ai;
+ const g=dominoGame,seat=dominoCurrentSeat();
+ if(!g||g.status!=='playing'||!seat)return;
  g.passCount=0;
- if(hand.length===0){dominoFinish(actor==='player'?'win':'loss');return}
+ if(seat.hand.length===0){dominoFinish(seat.id==='player'?'win':'loss','empty',seat);return}
  g.pendingTile=null;
- g.turn=actor==='player'?'ai':'player';
- g.statusText=actor==='player'?'La IA está pensando.':'Tu turno. Busca una ficha que coincida con los extremos.';
- if(g.turn==='ai'){dominoRender();scheduleDominoAi()}else dominoScheduleAutoPass();
+ dominoSetTurn(g.currentSeat+1);
+ const next=dominoCurrentSeat();
+ g.statusText=next.id==='player'?'Tu turno. Busca una ficha que coincida con los extremos.':next.name+' está pensando su jugada.';
+ if(next.id==='player')dominoScheduleAutoPass();
+ else{dominoRender();scheduleDominoAi()}
 }
 function dominoApplyTile(tileId,side,actor){
- const g=dominoGame;if(!g||g.status!=='playing'||(side!=='left'&&side!=='right'))return false;
- const hand=actor==='player'?g.player:g.ai,index=hand.findIndex(t=>t.id===tileId);
+ const g=dominoGame,seat=dominoCurrentSeat();
+ if(!g||!seat||g.status!=='playing'||(side!=='left'&&side!=='right'))return false;
+ if((actor==='player')!==(seat.id==='player'))return false;
+ const hand=seat.hand,index=hand.findIndex(t=>t.id===tileId);
  if(index<0)return false;
  const tile=hand[index],end=side==='left'?g.leftEnd:g.rightEnd;
  if(end!==null&&tile.a!==end&&tile.b!==end)return false;
  let display;
  if(end===null)display={a:tile.a,b:tile.b};
- else if(side==='left'){
-  // In the left arm, the matching half must face inward (to the right).
-  display=tile.a===end?{a:tile.b,b:tile.a}:{a:tile.a,b:tile.b};
- }else{
-  // In the right arm, the matching half must face inward (to the left).
-  display=tile.a===end?{a:tile.a,b:tile.b}:{a:tile.b,b:tile.a};
- }
+ else if(side==='left')display=tile.a===end?{a:tile.b,b:tile.a}:{a:tile.a,b:tile.b};
+ else display=tile.a===end?{a:tile.a,b:tile.b}:{a:tile.b,b:tile.a};
  if(end===null){g.leftEnd=display.a;g.rightEnd=display.b;g.board.push({id:tile.id,...display})}
  else if(side==='left'){g.leftEnd=display.a;g.board.unshift({id:tile.id,...display})}
  else{g.rightEnd=display.b;g.board.push({id:tile.id,...display})}
- hand.splice(index,1);g.pendingTile=null;g.lastMove={id:tile.id,side:side};g.statusText=actor==='player'?'Ficha colocada.':'La IA colocó una ficha.';
+ hand.splice(index,1);g.pendingTile=null;g.lastMove={id:tile.id,side:side};g.statusText=seat.id==='player'?'Ficha colocada.':seat.name+' colocó una ficha.';
  dominoAfterMove(actor);
  return true;
 }
 function dominoSelectPlayerTile(tileId){
- const g=dominoGame;if(!g||g.turn!=='player')return;
+ const g=dominoGame;if(!g||g.turn!=='player'||dominoCurrentSeat()?.id!=='player')return;
  if(g.status==='opening'){dominoOpenWithTile(tileId,'player');return}
  if(g.status!=='playing')return;
  const tile=g.player.find(t=>t.id===tileId);if(!tile||!dominoTileCanPlay(tile))return;
@@ -3299,20 +3398,14 @@ function dominoSelectPlayerTile(tileId){
  const canRight=tile.a===g.rightEnd||tile.b===g.rightEnd;
  if(!canLeft&&!canRight)return;
  if(canLeft&&canRight){
-  if(g.leftEnd===g.rightEnd){
-   dominoApplyTile(tileId,Math.random()<.5?'left':'right','player');
-   return;
-  }
-  g.pendingTile=tileId;
-  g.statusText='Elige el extremo que ya está colocado en la mesa.';
-  dominoRender();
-  return;
+  if(g.leftEnd===g.rightEnd){dominoApplyTile(tileId,Math.random()<.5?'left':'right','player');return}
+  g.pendingTile=tileId;g.statusText='Elige el extremo que ya está colocado en la mesa.';dominoRender();return;
  }
  dominoApplyTile(tileId,canLeft?'left':'right','player');
 }
 function dominoScheduleAutoPass(){
- const g=dominoGame;
- if(!g||g.status!=='playing'||g.turn!=='player'||g.pendingTile!==null)return;
+ const g=dominoGame,seat=dominoCurrentSeat();
+ if(!g||!seat||g.status!=='playing'||seat.id!=='player'||g.pendingTile!==null)return;
  if(g.autoPassPending)return;
  if(dominoHasMove(g.player)){dominoRender();return}
  g.autoPassPending=true;
@@ -3321,78 +3414,76 @@ function dominoScheduleAutoPass(){
  const gameId=g.id;
  dominoPassTimer=setTimeout(()=>{
   dominoPassTimer=null;
-  if(dominoGame!==g||g.id!==gameId||g.status!=='playing'||g.turn!=='player'||!g.autoPassPending)return;
-  g.autoPassPending=false;
-  dominoPassPlayer();
+  if(dominoGame!==g||g.id!==gameId||g.status!=='playing'||dominoCurrentSeat()?.id!=='player'||!g.autoPassPending)return;
+  g.autoPassPending=false;dominoPassPlayer();
  },1350);
 }
 function dominoPassPlayer(){
- const g=dominoGame;if(!g||g.turn!=='player'||g.status!=='playing'||dominoHasMove(g.player))return;
+ const g=dominoGame;if(!g||g.turn!=='player'||g.status!=='playing'||dominoCurrentSeat()?.id!=='player'||dominoHasMove(g.player))return;
  if(dominoPassTimer){clearTimeout(dominoPassTimer);dominoPassTimer=null}
- g.autoPassPending=false;
- g.passCount++;
- g.pendingTile=null;g.turn='ai';g.statusText='No tenías una ficha válida y pasaste turno. La IA juega ahora.';
+ g.autoPassPending=false;g.passCount++;g.pendingTile=null;
+ g.statusText='No tenías una ficha válida y pasaste turno.';
  if(dominoCheckBlocked())return;
- dominoShowCenterNotice('¡TE PASASTE!','No tienes una ficha que encaje. Ahora juega la IA.','pass',1750);
- scheduleDominoAi();
+ dominoShowCenterNotice('¡TE PASASTE!','No tienes una ficha que encaje. Juega el siguiente participante.','pass',1650);
+ dominoAdvanceTurn();
 }
 function dominoAiTurn(){
- const g=dominoGame;if(!g||g.turn!=='ai')return;
+ const g=dominoGame,seat=dominoCurrentSeat();if(!g||!seat||seat.id==='player'||g.turn!=='ai')return;
  if(g.status==='opening'){
-  const choices=g.ai.slice().sort((a,b)=>{
-   const aDouble=a.a===a.b?1:0,bDouble=b.a===b.b?1:0;
-   return bDouble-aDouble||(b.a+b.b)-(a.a+a.b);
-  });
+  const choices=seat.hand.slice().sort((a,b)=>(b.a===b.b?1:0)-(a.a===a.b?1:0)||(b.a+b.b)-(a.a+a.b));
   if(choices.length)dominoOpenWithTile(choices[0].id,'ai');
   return;
  }
  if(g.status!=='playing')return;
- if(!dominoHasMove(g.ai)){
-  g.passCount++;g.turn='player';g.statusText='La IA no puede jugar y pasó turno. Ahora te toca a ti.';
+ if(!dominoHasMove(seat.hand)){
+  g.passCount++;g.statusText=seat.name+' no tiene una ficha válida y pasó turno.';
   if(dominoCheckBlocked())return;
-  dominoShowCenterNotice('¡LA IA SE PASÓ!','La IA no tiene una ficha válida. Ahora te toca.','ai-pass',1500);
-  dominoScheduleAutoPass();return;
+  dominoShowCenterNotice('¡'+seat.name+' SE PASÓ!','No tiene una ficha que encaje. Sigue el próximo participante.','ai-pass',1450);
+  dominoAdvanceTurn();return;
  }
  const choices=[];
- for(const t of g.ai){
+ for(const t of seat.hand){
   const canLeft=t.a===g.leftEnd||t.b===g.leftEnd;
   const canRight=t.a===g.rightEnd||t.b===g.rightEnd;
   if(canLeft&&canRight&&g.leftEnd===g.rightEnd)choices.push({tile:t,side:Math.random()<.5?'left':'right'});
-  else{
-   if(canLeft)choices.push({tile:t,side:'left'});
-   if(canRight)choices.push({tile:t,side:'right'});
-  }
+  else{if(canLeft)choices.push({tile:t,side:'left'});if(canRight)choices.push({tile:t,side:'right'})}
  }
  choices.sort((a,b)=>(b.tile.a+b.tile.b)-(a.tile.a+a.tile.b));
- const move=choices[0];
- if(move)dominoApplyTile(move.tile.id,move.side,'ai');
+ const move=choices[0];if(move)dominoApplyTile(move.tile.id,move.side,'ai');
 }
 function scheduleDominoAi(){
  if(dominoAiTimer)clearTimeout(dominoAiTimer);
  const id=dominoGame?dominoGame.id:0;
- dominoAiTimer=setTimeout(()=>{
-  dominoAiTimer=null;
-  if(dominoGame&&dominoGame.id===id)dominoAiTurn();
- },650);
+ dominoAiTimer=setTimeout(()=>{dominoAiTimer=null;if(dominoGame&&dominoGame.id===id)dominoAiTurn()},650);
 }
 function startDominoGame(){
  if(dominoAiTimer){clearTimeout(dominoAiTimer);dominoAiTimer=null}
  if(dominoPassTimer){clearTimeout(dominoPassTimer);dominoPassTimer=null}
  if(dominoNoticeTimer){clearTimeout(dominoNoticeTimer);dominoNoticeTimer=null}
  dominoNoticeSerial++;
+ const playerCount=[2,3,4].includes(dominoConfig.players)?dominoConfig.players:2;
+ const handSize=[7,10].includes(dominoConfig.handSize)?dominoConfig.handSize:7;
+ const maxPip=handSize===10?9:6;
  const deck=[];let id=0;
- for(let a=0;a<=6;a++)for(let b=a;b<=6;b++)deck.push({id:id++,a:a,b:b});
+ for(let a=0;a<=maxPip;a++)for(let b=a;b<=maxPip;b++)deck.push({id:id++,a,b});
  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]]}
- const playerHand=deck.slice(0,7),aiHand=deck.slice(7,14);
- const starter=Math.random()<.5?'player':'ai';
+ const seats=Array.from({length:playerCount},(_,i)=>({
+  id:i===0?'player':'ai'+i,name:i===0?'TÚ':'IA '+i,avatar:i===0?'🧑':'🤖',
+  hand:deck.slice(i*handSize,(i+1)*handSize)
+ }));
+ const starter=Math.floor(Math.random()*playerCount);
  dominoGame={
-  id:++dominoGameSerial,status:'opening',
-  statusText:starter==='player'?'¡Te toca abrir! Elige una ficha de tu mano.':'La IA sale primero y colocará su ficha inicial.',
-  player:playerHand,ai:aiHand,board:[],openingTileId:null,leftEnd:null,rightEnd:null,
-  turn:starter,pendingTile:null,passCount:0,result:null,resultText:''
+  id:++dominoGameSerial,status:'opening',statusText:'Preparando la partida…',
+  player:seats[0].hand,ai:seats[1].hand,seats,currentSeat:starter,
+  playerCount,handSize,maxPip,
+  board:[],openingTileId:null,leftEnd:null,rightEnd:null,
+  turn:'player',pendingTile:null,passCount:0,result:null,resultText:''
  };
+ dominoSetTurn(starter);
+ const first=dominoCurrentSeat();
+ dominoGame.statusText=first.id==='player'?'¡Te toca abrir! Elige una de tus fichas.':first.name+' abrirá la partida.';
  dominoRender();
- if(starter==='ai')scheduleDominoAi();
+ if(first.id!=='player')scheduleDominoAi();
 }
 function performGameAction(id){
  const close=()=>{closeGamePanel();updateGameHUD()};
@@ -3540,6 +3631,9 @@ $('gameActionList').addEventListener('click',e=>{
  const interactionBack=e.target.closest('[data-interaction-back]');if(interactionBack){nearestAction(currentInteractionTarget);return}
  const businessBack=e.target.closest('[data-business-back]');if(businessBack){nearestAction(currentInteractionTarget);return}
  const cancelWork=e.target.closest('[data-cancel-work]');if(cancelWork){activeWorkShift=null;closeGamePanel();toast('Turno cancelado. No se realizó el pago.');return}
+ const playerMode=e.target.closest('[data-domino-players]');if(playerMode){dominoConfig.players=Number(playerMode.dataset.dominoPlayers);dominoRender();return}
+ const handMode=e.target.closest('[data-domino-hand-size]');if(handMode){dominoConfig.handSize=Number(handMode.dataset.dominoHandSize);dominoRender();return}
+ const newDominoGame=e.target.closest('[data-domino-new-game]');if(newDominoGame){startDominoGame();return}
  const dominoReplay=e.target.closest('[data-domino-replay]');if(dominoReplay){startDominoGame();return}
  const boardSide=e.target.closest('[data-domino-board-side]');if(boardSide){if(dominoGame&&dominoGame.pendingTile!==null)dominoApplyTile(dominoGame.pendingTile,boardSide.dataset.dominoBoardSide,'player');return}
  const dominoTile=e.target.closest('[data-domino-tile]');if(dominoTile){dominoSelectPlayerTile(Number(dominoTile.dataset.dominoTile));return}
