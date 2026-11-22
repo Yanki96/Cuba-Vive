@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b27">
 <meta name="description" content="SIM Cuba: simulador de vida 3D low-poly ambientado en Cuba, con creador visual de personajes y ciudad explorable.">
-<title>SIM Cuba — Comercios, empleo y dominó 0.74</title>
+<title>SIM Cuba — Comercios, empleo y dominó 0.75</title>
 <style>
 :root{color-scheme:dark;--cream:#f2e8cc;--muted:#b6c6b7;--green:#a7cf8a;--gold:#e6c779;--line:#ffffff30}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172b27;color:var(--cream);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:#29413a;border-radius:10px;padding:10px 13px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -1454,6 +1454,27 @@
  min-height:var(--origin-box-height);
 }
 
+
+/* SIM Cuba 0.75 — reinicio desde el aviso central y fichas más finas */
+.domino-center-notice{min-height:118px!important;padding:14px 17px!important}
+.domino-center-notice-copy{align-items:flex-start}
+.domino-center-notice-restart{
+ display:inline-flex;align-items:center;justify-content:center;align-self:flex-start;
+ min-height:34px;margin-top:5px;padding:7px 14px;border:1px solid #d9cf91;
+ border-radius:9px;background:linear-gradient(135deg,#d8c47f,#b5d18d);
+ color:#20382b;font-size:10px;line-height:1;font-weight:950;letter-spacing:.65px;
+ box-shadow:0 3px 10px #0005,inset 0 1px #fff9;cursor:pointer;pointer-events:auto
+}
+.domino-center-notice-restart:hover{filter:brightness(1.08)}
+.domino-center-notice-restart:focus-visible{outline:2px solid #fff1b7;outline-offset:3px}
+.domino-hand-tile{height:43px!important}
+.domino-board-origin .domino-chain-piece.is-origin-rotated{flex-direction:row!important}
+@media(max-width:620px){
+ .domino-center-notice{min-height:108px!important;padding:11px 12px!important}
+ .domino-center-notice-restart{min-height:32px;padding:7px 11px;font-size:9px}
+ .domino-hand-tile{height:39px!important}
+}
+
 </style>
 </head>
 <body>
@@ -1644,7 +1665,7 @@
     <button class="randomize-btn" id="randomizeBtn" type="button">⤨ Sorpréndeme · Aleatorio</button>
    </aside>
   </div>
-  <footer class="creator-footer"><span>SIM CUBA <b>0.74</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
+  <footer class="creator-footer"><span>SIM CUBA <b>0.75</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
  </div>
 </div>
 <script>
@@ -3225,8 +3246,8 @@ function dominoArmMarkup(tiles,side,originIsDouble=false){
  if(!tiles.length)return '<div class="domino-arm-empty">'+(side==='left'?'←':'→')+'</div>';
  const mobile=window.innerWidth<=620;
  const cfg=mobile
-  ?{tileW:38,tileH:28,gap:4,rowGap:5,columns:2,centerWidth:96}
-  :{tileW:54,tileH:39,gap:5,rowGap:6,columns:4,centerWidth:136};
+  ?{tileW:38,tileH:25,gap:4,rowGap:5,columns:2,centerWidth:96}
+  :{tileW:54,tileH:35,gap:5,rowGap:6,columns:4,centerWidth:136};
  const {tileW,tileH,gap,rowGap,columns,centerWidth}=cfg;
  // La ficha inicial está girada: centramos cada brazo contra su borde, dejando separación visible.
  const centerInset=Math.max(0,(centerWidth-tileH)/2-gap);
@@ -3339,7 +3360,7 @@ function dominoRender(){
  const leftTiles=originIndex>=0?g.board.slice(0,originIndex).reverse():[];
  const rightTiles=originIndex>=0?g.board.slice(originIndex+1):[];
  const originMobile=window.innerWidth<=620;
- const originTileW=originMobile?38:54,originTileH=originMobile?28:39;
+ const originTileW=originMobile?38:54,originTileH=originMobile?25:35;
  const originBoxStyle='--origin-box-width:'+originTileH+'px;--origin-box-height:'+originTileW+'px;--origin-tile-width:'+originTileW+'px;--origin-tile-height:'+originTileH+'px';
  const originMarkup=origin
   ?'<div class="domino-board-origin" style="'+originBoxStyle+'"><small>INICIO</small><div class="domino-piece domino-chain-piece is-origin-rotated'+(origin.a===origin.b?' is-double':'')+'">'+dominoFaceMarkup(origin)+'</div></div>'
@@ -3372,7 +3393,7 @@ function dominoRender(){
   '<div class="domino-scorebar"><span class="domino-turn-badge '+(!isPlayerTurn&&g.status!=='finished'?'is-ai':g.status==='finished'?'is-finished':'is-player')+'">'+turnLabel+'</span><span class="domino-score-stat">'+g.playerCount+' JUGADORES · '+g.handSize+' FICHAS</span><span class="domino-score-stat">PASES <b>'+g.passCount+'/'+g.playerCount+'</b> · MESA <b>'+g.board.length+'</b></span></div>'+
   '<div class="domino-table-shell"><div class="domino-table-felt">'+
    '<div class="domino-table-caption"><span>✦ MESA DE DOMINÓ</span><span>INICIO EN EL CENTRO · '+setName+'</span></div>'+
-   (g.centerNotice?'<div class="domino-center-notice is-'+g.centerNotice.type+'" role="status" aria-live="polite"><span class="domino-center-notice-icon">'+g.centerNotice.icon+'</span><span class="domino-center-notice-copy"><b>'+escapeHTML(g.centerNotice.title)+'</b><small>'+escapeHTML(g.centerNotice.detail)+'</small></span><i class="domino-center-notice-shine"></i></div>':'')+
+   (g.centerNotice?'<div class="domino-center-notice is-'+g.centerNotice.type+'" '+(g.status==='finished'?'style="pointer-events:auto"':'')+' role="status" aria-live="polite"><span class="domino-center-notice-icon">'+g.centerNotice.icon+'</span><span class="domino-center-notice-copy"><b>'+escapeHTML(g.centerNotice.title)+'</b><small>'+escapeHTML(g.centerNotice.detail)+'</small>'+(g.status==='finished'?'<button type="button" class="domino-center-notice-restart" data-domino-new-game="true">VOLVER A JUGAR ↻</button>':'')+'</span><i class="domino-center-notice-shine"></i></div>':'')+
    '<div class="domino-opponents">'+opponentsMarkup+'</div>'+
    '<div class="domino-board-scroll"><div class="domino-chain">'+chain+'</div></div>'+
    '<div class="domino-board-ends">'+
@@ -3383,7 +3404,6 @@ function dominoRender(){
    '<div class="domino-seat domino-seat-player'+(isPlayerTurn&&g.status!=='finished'?' is-active':'')+'"><div class="domino-seat-avatar">🧑</div><div class="domino-seat-copy"><b>TÚ'+(g.teamMode?' · TU EQUIPO':'')+'</b><small>'+(isPlayerTurn?(g.status==='opening'?'Elige la ficha inicial':'Tu turno'):'En la mesa')+'</small></div><div class="domino-player-count">'+g.player.length+' / '+g.handSize+' fichas</div></div>'+
   '</div></div>'+
   '<div class="domino-hand-panel"><div class="domino-hand-head"><b>TUS FICHAS · '+g.handSize+' POR JUGADOR</b><span>'+g.player.length+' / '+g.handSize+'</span></div><div class="domino-hand">'+(playerTiles||'<span class="domino-empty">No te quedan fichas.</span>')+'</div></div>'+
-  (g.status==='finished'?'<div class="domino-finish-actions"><span>La partida terminó. Puedes cambiar el modo y volver a jugar.</span><button type="button" class="domino-mode-start" data-domino-new-game="true">ELEGIR OTRA PARTIDA <i>↗</i></button></div>':'')+
  '</div>';
  modal.classList.remove('hidden');
  const boardScroll=list.querySelector('.domino-board-scroll');
