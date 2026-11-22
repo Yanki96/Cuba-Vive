@@ -1895,10 +1895,22 @@ function roadSegmentRectDistance(a,b,minX,minZ,maxX,maxZ){
 }
 const CITY_LOOP_PATH=sampleRoadCurve(CITY_LOOP_ANCHORS,true,10);
 const RURAL_PATH_POLYLINES=RURAL_PATHS.map(path=>sampleRoadCurve(path.points,false,10));
+const RURAL_PATH_ZONES=RURAL_PATH_POLYLINES.map(points=>({
+ points,
+ minX:Math.min(...points.map(p=>p[0])),maxX:Math.max(...points.map(p=>p[0])),
+ minZ:Math.min(...points.map(p=>p[1])),maxZ:Math.max(...points.map(p=>p[1]))
+}));
 function roadCorridorNear(x,z,clear=1.34){
  if(MAP_ROADS.some(r=>Math.abs(x-r)<clear||Math.abs(z-r)<clear))return true;
- if(roadPolylineDistance(x,z,CITY_LOOP_PATH,true)<.78+clear)return true;
- return RURAL_PATH_POLYLINES.some(points=>roadPolylineDistance(x,z,points)<RURAL_PATH_HALF+clear);
+ const loopReach=.78+clear;
+ if((Math.abs(Math.abs(x)-CITY_EDGE)<loopReach&&Math.abs(z)<CITY_EDGE+loopReach)||
+    (Math.abs(Math.abs(z)-CITY_EDGE)<loopReach&&Math.abs(x)<CITY_EDGE+loopReach))return true;
+ const reach=RURAL_PATH_HALF+clear;
+ for(const zone of RURAL_PATH_ZONES){
+  if(x<zone.minX-reach||x>zone.maxX+reach||z<zone.minZ-reach||z>zone.maxZ+reach)continue;
+  if(roadPolylineDistance(x,z,zone.points)<reach)return true;
+ }
+ return false;
 }
 const $=id=>document.getElementById(id);
 const CREATOR_SKIN={ '🏻':'#f0c9a6','🏼':'#dfae87','🏽':'#bd8965','🏾':'#8d5a3e','🏿':'#603b2b' };
