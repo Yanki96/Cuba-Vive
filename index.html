@@ -1451,8 +1451,8 @@ function setupCamera(){
  const viewRadius=Math.hypot(halfW,halfH);
  // Near fija el límite de recorte cercano; Far controla cuánto alcanza a dibujar.
  // Se amplía el rango de profundidad sin tocar el factor de zoom.
- const nearClip=1.0;
- const farClip=3000+Math.max(0,viewRadius-baseViewRadius)*64;
+ const nearClip=.01;
+ const farClip=5000+Math.max(0,viewRadius-baseViewRadius)*80;
  const view=matLookAt(eye,target,[0,1,0]),proj=matOrtho(-halfW,halfW,-halfH,halfH,nearClip,farClip);
  cameraState.target=target;cameraState.eye=eye;cameraState.forward=forward;cameraState.right=right;cameraState.up=up;cameraState.halfH=halfH;cameraState.viewProj=matMul(proj,view);cameraState.ready=true;
 }
