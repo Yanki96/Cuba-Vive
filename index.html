@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b27">
 <meta name="description" content="SIM Cuba: simulador de vida 3D low-poly ambientado en Cuba, con creador visual de personajes y ciudad explorable.">
-<title>SIM Cuba — Comercios, empleo y dominó 0.75</title>
+<title>SIM Cuba — Comercios, empleo y dominó 0.76</title>
 <style>
 :root{color-scheme:dark;--cream:#f2e8cc;--muted:#b6c6b7;--green:#a7cf8a;--gold:#e6c779;--line:#ffffff30}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172b27;color:var(--cream);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:#29413a;border-radius:10px;padding:10px 13px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -1475,6 +1475,22 @@
  .domino-hand-tile{height:39px!important}
 }
 
+
+/* SIM Cuba 0.76 — la ficha de inicio conserva exactamente la talla normal */
+.domino-board-origin .domino-chain-piece.is-origin-rotated{
+ box-sizing:border-box!important;
+ flex:0 0 var(--origin-tile-width)!important;
+ width:var(--origin-tile-width)!important;
+ min-width:var(--origin-tile-width)!important;
+ max-width:var(--origin-tile-width)!important;
+ height:var(--origin-tile-height)!important;
+ min-height:var(--origin-tile-height)!important;
+ max-height:var(--origin-tile-height)!important;
+ flex-direction:row!important;
+ transform:rotate(90deg);
+ transform-origin:center center;
+}
+
 </style>
 </head>
 <body>
@@ -1665,7 +1681,7 @@
     <button class="randomize-btn" id="randomizeBtn" type="button">⤨ Sorpréndeme · Aleatorio</button>
    </aside>
   </div>
-  <footer class="creator-footer"><span>SIM CUBA <b>0.75</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
+  <footer class="creator-footer"><span>SIM CUBA <b>0.76</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
  </div>
 </div>
 <script>
@@ -3363,7 +3379,7 @@ function dominoRender(){
  const originTileW=originMobile?38:54,originTileH=originMobile?25:35;
  const originBoxStyle='--origin-box-width:'+originTileH+'px;--origin-box-height:'+originTileW+'px;--origin-tile-width:'+originTileW+'px;--origin-tile-height:'+originTileH+'px';
  const originMarkup=origin
-  ?'<div class="domino-board-origin" style="'+originBoxStyle+'"><small>INICIO</small><div class="domino-piece domino-chain-piece is-origin-rotated'+(origin.a===origin.b?' is-double':'')+'">'+dominoFaceMarkup(origin)+'</div></div>'
+  ?'<div class="domino-board-origin" style="'+originBoxStyle+'"><small>INICIO</small><div class="domino-piece domino-chain-piece is-origin-rotated">'+dominoFaceMarkup(origin)+'</div></div>'
   :'<div class="domino-board-origin is-opening" style="'+originBoxStyle+'"><small>FICHA INICIAL</small><div class="domino-opening-slot">'+(g.status==='opening'?'COLOCA AQUÍ':'ESPERANDO')+'</div></div>';
  const chain='<div class="domino-board-center">'+
   '<div class="domino-arm domino-arm-left">'+dominoArmMarkup(leftTiles,'left',!!origin&&origin.a===origin.b)+'</div>'+
