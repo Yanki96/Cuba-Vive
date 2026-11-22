@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b27">
 <meta name="description" content="SIM Cuba: simulador de vida 3D low-poly ambientado en Cuba, con creador visual de personajes y ciudad explorable.">
-<title>SIM Cuba — Cámara inferior y zoom optimizados 0.55</title>
+<title>SIM Cuba — Ciclo de vida 0.56</title>
 <style>
 :root{color-scheme:dark;--cream:#f2e8cc;--muted:#b6c6b7;--green:#a7cf8a;--gold:#e6c779;--line:#ffffff30}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172b27;color:var(--cream);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:#29413a;border-radius:10px;padding:10px 13px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -721,7 +721,7 @@
 }
 
 
-/* SIM Cuba 0.55 — encuadre inferior completo y zoom sin repintados repetidos */
+/* SIM Cuba 0.56 — ciclo de necesidades, empleo, descanso y salud */
 .game-panel:not(.phone-mode){width:min(460px,calc(100vw - 28px));padding:15px}
 .game-action-list{gap:7px;margin-top:12px}
 .game-action{min-height:57px;padding:8px 9px;gap:8px}
@@ -931,7 +931,7 @@
     <button class="randomize-btn" id="randomizeBtn" type="button">⤨ Sorpréndeme · Aleatorio</button>
    </aside>
   </div>
-  <footer class="creator-footer"><span>SIM CUBA <b>0.55</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
+  <footer class="creator-footer"><span>SIM CUBA <b>0.56</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
  </div>
 </div>
 <script>
@@ -1361,6 +1361,7 @@ let worldLabelTargets=[],worldLabelButtons=[];
 function describeInteractableObject(o){
  if(!o)return null;
  if(o===HOME_BUILDING)return {kind:'home',obj:o,label:'Tu casa',title:'Tu casa',icon:'🏠'};
+ if(o.type==='house'&&o.style==='clinic')return {kind:'clinic',obj:o,label:'Consultorio',title:'Consultorio',icon:'🏥'};
  if(o.type==='shop'){
   const style=o.style||'shop';
   const info={bodega:['Bodega','🏪'],market:['Mercado','🛒'],cafe:['Cafetería','☕'],bakery:['Panadería','🥖'],restaurant:['Restaurante','🍛'],workshop:['Taller','🧰'],garage:['Garaje','🔧'],pharmacy:['Farmacia','💊'],shop:['Comercio','🏬']};
@@ -1375,7 +1376,7 @@ function describeInteractableObject(o){
 function createWorldLabels(){
  const holder=$('worldLabels');if(!holder)return;
  holder.innerHTML='';worldLabelTargets=[];worldLabelButtons=[];
- const list=[HOME_BUILDING,...CITY_OBJECTS.filter(o=>o.type==='shop'||o.type==='domino'||o.type==='bench')].filter(Boolean);
+ const list=[HOME_BUILDING,...CITY_OBJECTS.filter(o=>o.type==='shop'||o.type==='domino'||o.type==='bench'||(o.type==='house'&&o.style==='clinic'))].filter(Boolean);
  const seen=new Set();
  list.forEach(o=>{
   if(seen.has(o))return;seen.add(o);
@@ -2093,7 +2094,18 @@ function clampNeed(v){return Math.max(0,Math.min(100,v))}
 function changeNeeds(delta){for(const [k,v] of Object.entries(delta)){if(k in needs)needs[k]=clampNeed(needs[k]+v)}updateGameHUD();saveGame()}
 function applyNeedDecay(gameMins){
  needAccumulator+=gameMins;
- while(needAccumulator>=30){needAccumulator-=30;needs.hunger=clampNeed(needs.hunger-2.3);needs.energy=clampNeed(needs.energy-1.1);needs.hygiene=clampNeed(needs.hygiene-1.15);needs.fun=clampNeed(needs.fun-.85);needs.social=clampNeed(needs.social-.55);if(needs.hunger<8||needs.energy<5)needs.health=clampNeed(needs.health-.8)}
+ while(needAccumulator>=30){
+  needAccumulator-=30;
+  needs.hunger=clampNeed(needs.hunger-2.3);
+  needs.energy=clampNeed(needs.energy-1.1);
+  needs.hygiene=clampNeed(needs.hygiene-1.15);
+  needs.fun=clampNeed(needs.fun-.85);
+  needs.social=clampNeed(needs.social-.55);
+  // La falta prolongada de comida, sueño o higiene perjudica la salud.
+  if(needs.hunger<12||needs.energy<10||needs.hygiene<10)needs.health=clampNeed(needs.health-1.1);
+  // Una rutina equilibrada permite recuperarse poco a poco.
+  else if(needs.hunger>=35&&needs.energy>=30&&needs.hygiene>=25&&needs.health<100)needs.health=clampNeed(needs.health+.45);
+ }
 }
 function advanceGameMinutes(amount){let left=Math.max(0,Math.floor(amount));while(left>0){const step=Math.min(left,1440-minutes);minutes+=step;applyNeedDecay(step);left-=step;if(minutes>=1440){minutes=0;day++}}updateClockUI();updateGameHUD();saveGame()}
 function formatCash(n){return Math.round(n).toLocaleString('es-ES')+' CUP'}
@@ -2255,8 +2267,15 @@ function nearestAction(targetOverride=null){
  if(target.kind==='home'){
   openGamePanel('Tu casa','Elige qué hacer en casa.',[
    {id:'sleep',icon:'🛏️',title:'Dormir',sub:'Descansa 8 horas y recupera energía.'},
+   {id:'nap',icon:'😴',title:'Tomar una siesta',sub:'90 minutos · Recupera energía.'},
    {group:'homecare',icon:'🚿',title:'Rutina personal',sub:'Ducharte u ordenar la habitación.'}
   ],'HOGAR','Hogar · '+(HOME_BUILDING?.style||'casa'));
+ }else if(target.kind==='clinic'){
+  const serious=needs.health<40,cost=serious?280:180,gain=serious?65:35,time=serious?90:60;
+  const unavailable=needs.health>=98;
+  openGamePanel('Consultorio','Cuida tu salud para poder seguir trabajando y disfrutando del día.',[
+   {id:'heal',icon:'🩺',title:'Recibir atención médica',sub:unavailable?'Tu salud está en buen estado.':cost+' CUP · +'+gain+' salud · '+time+' minutos',disabled:unavailable||cash<cost}
+  ],'SALUD','Salud · '+Math.round(needs.health)+'/100 · Dinero · '+formatCash(cash));
  }else if(target.kind==='store'||target.kind==='cafe'||target.kind==='work'){
   const actions=[{group:'food',icon:'🛒',title:'Comprar comida',sub:'Ver los productos disponibles.'}];
   if(!job)actions.push({id:'apply-job',icon:'📋',title:'Solicitar empleo',sub:'Pregunta por una oportunidad de trabajo.'});
@@ -2267,8 +2286,9 @@ function nearestAction(targetOverride=null){
    {id:'domino-game',icon:'🁫',title:'Jugar dominó',sub:'30 minutos · Diversión y socialización.'}
   ],'VIDA DE BARRIO','Parque / plaza');
  }else{
-  openGamePanel('Banco del parque','Tómate un descanso antes de seguir con tus planes.',[
-   {id:'rest',icon:'🌳',title:'Descansar',sub:'30 minutos · Recupera energía y diversión.'}
+  openGamePanel('Banco del parque','Recupera energía o comparte un rato con los vecinos.',[
+   {id:'rest',icon:'🌳',title:'Descansar',sub:'30 minutos · Recupera energía y diversión.'},
+   {id:'socialize',icon:'💬',title:'Conversar con vecinos',sub:'20 minutos · Mejora el ánimo y la socialización.'}
   ],'DESCANSO','Espacio público');
  }
 }
@@ -2304,7 +2324,19 @@ function performGameAction(id){
  const close=()=>{closeGamePanel();updateGameHUD()};
  if(id==='leave'){close();return}
  if(id==='sleep'){
-  changeNeeds({energy:82,hunger:-20,hygiene:-12,fun:8});advanceGameMinutes(480);close();toast('Has descansado. Comienza un nuevo día.');return;
+  changeNeeds({energy:82,hunger:-14,hygiene:-10,fun:8});advanceGameMinutes(480);close();toast('Has dormido 8 horas. ¡A empezar el día!');return;
+ }
+ if(id==='nap'){
+  if(needs.energy>=92){toast('Todavía tienes energía suficiente; guarda la siesta para más tarde.');return}
+  changeNeeds({energy:38,hunger:-5,hygiene:-2,fun:3});advanceGameMinutes(90);close();toast('Has tomado una siesta y recuperado energía.');return;
+ }
+ if(id==='heal'){
+  const target=currentInteractionTarget;
+  if(!target||target.kind!=='clinic'){toast('Acércate al consultorio para recibir atención.');return}
+  if(needs.health>=98){toast('Tu salud está en buen estado.');return}
+  const serious=needs.health<40,cost=serious?280:180,gain=serious?65:35,time=serious?90:60;
+  if(cash<cost){toast('No tienes dinero suficiente para la atención médica.');return}
+  cash-=cost;advanceGameMinutes(time);changeNeeds({health:gain,fun:3});close();toast('Recibiste atención médica. Salud +'+gain+'.');return;
  }
  if(id==='shower'){changeNeeds({hygiene:72,energy:-2});advanceGameMinutes(20);close();toast('Te has duchado.');return}
  if(id==='tidy'){changeNeeds({fun:12,hygiene:2});advanceGameMinutes(30);close();toast('La habitación quedó más ordenada.');return}
@@ -2321,13 +2353,14 @@ function performGameAction(id){
  if(id==='work-shift'){
   if(!job){toast('Primero necesitas conseguir un empleo.');return}
   const hour=Math.floor(minutes/60);if(hour<7||hour>=18){toast('El turno está disponible entre las 7:00 y las 18:00.');return}
-  if(needs.energy<22||needs.hunger<15){toast('Estás demasiado cansado o tienes demasiada hambre para trabajar.');return}
+  if(needs.energy<22||needs.hunger<15||needs.health<20){toast('Necesitas comer, descansar o recuperarte antes de trabajar.');return}
   advanceGameMinutes(240);changeNeeds({energy:-25,hunger:-26,hygiene:-12,fun:-9,social:4});job.shifts++;
   let pay=job.pay;if(job.shifts%5===0){job.pay+=50;toast('¡Te ganaste un pequeño aumento!')}
   cash+=pay;finishQuest('worked',200,'¡Primer turno completado!');updateGameHUD();saveGame();close();toast(`Terminaste tu turno y cobraste ${formatCash(pay)}.`);return;
  }
  if(id==='domino-game'){changeNeeds({fun:24,social:18,energy:-4});advanceGameMinutes(30);close();toast('Buena partida. Te despejaste un rato.');return}
- if(id==='rest'){changeNeeds({energy:12,fun:9});advanceGameMinutes(30);close();toast('Descansaste un rato en el parque.');return}
+ if(id==='socialize'){changeNeeds({social:18,fun:10,energy:-2});advanceGameMinutes(20);close();toast('Conversaste un rato con los vecinos.');return}
+ if(id==='rest'){changeNeeds({energy:15,fun:9});advanceGameMinutes(30);close();toast('Descansaste un rato en el parque.');return}
  close();
 }
 const PHONE_THEME_KEY='SIM_CUBA_PHONE_THEME';
