@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b27">
 <meta name="description" content="SIM Cuba: simulador de vida 3D low-poly ambientado en Cuba, con creador visual de personajes y ciudad explorable.">
-<title>SIM Cuba — Dos bancos 0.42</title>
+<title>SIM Cuba — Renderizado según zoom 0.43</title>
 <style>
 :root{color-scheme:dark;--cream:#f2e8cc;--muted:#b6c6b7;--green:#a7cf8a;--gold:#e6c779;--line:#ffffff30}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172b27;color:var(--cream);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:#29413a;border-radius:10px;padding:10px 13px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -721,7 +721,7 @@
 }
 
 
-/* SIM Cuba 0.42 — dos bancos junto a zonas de descanso */
+/* SIM Cuba 0.43 — terreno y distancia de cámara adaptados al zoom */
 .game-panel:not(.phone-mode){width:min(460px,calc(100vw - 28px));padding:15px}
 .game-action-list{gap:7px;margin-top:12px}
 .game-action{min-height:57px;padding:8px 9px;gap:8px}
@@ -931,7 +931,7 @@
     <button class="randomize-btn" id="randomizeBtn" type="button">⤨ Sorpréndeme · Aleatorio</button>
    </aside>
   </div>
-  <footer class="creator-footer"><span>SIM CUBA <b>0.42</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
+  <footer class="creator-footer"><span>SIM CUBA <b>0.43</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
  </div>
 </div>
 <script>
@@ -1445,7 +1445,10 @@ function setupCamera(){
  // La cámara sigue al jugador para explorar toda la ciudad sin cambiar de pantalla por bloques.
  const target=[(started?player.x:0)+cameraPan.x,.25,(started?player.y:0)+cameraPan.z],eye=[target[0]+10,target[1]+11,target[2]+10],forward=vNorm(vSub(target,eye)),right=vNorm(vCross(forward,[0,1,0])),up=vNorm(vCross(right,forward));
  const aspect=W/Math.max(1,H),baseHalfH=aspect<.78?12.2:10.4,halfH=baseHalfH/cameraZoom,halfW=halfH*aspect;
- const view=matLookAt(eye,target,[0,1,0]),proj=matOrtho(-halfW,halfW,-halfH,halfH,.1,110);
+ // Al alejar, el encuadre abarca más mundo: ampliamos el plano lejano para que
+ // los objetos del fondo no desaparezcan antes de llegar al borde de la vista.
+ const farClip=110+Math.max(0,halfH-baseHalfH)*3.2;
+ const view=matLookAt(eye,target,[0,1,0]),proj=matOrtho(-halfW,halfW,-halfH,halfH,.1,farClip);
  cameraState.target=target;cameraState.eye=eye;cameraState.forward=forward;cameraState.right=right;cameraState.up=up;cameraState.halfH=halfH;cameraState.viewProj=matMul(proj,view);cameraState.ready=true;
 }
 function projectWorldToScreen(x,z,y=0){
@@ -1819,8 +1822,9 @@ function addCar3D(m,o){
  }
 }
 function addStaticWorld(m){
- // Ciudad extendida: 45x45 unidades, con una red de calles conectadas.
- m.box(-25.5,-.34,-25.5,51,.34,51,'#8eaf70','#85a568','#74945d');
+ // Suelo amplio para que no aparezca un borde al alejar la cámara o moverla.
+ // El barrio ocupa 45x45 unidades; este terreno deja margen para el zoom mínimo y el desplazamiento.
+ m.box(-110,-.34,-110,220,.34,220,'#8eaf70','#85a568','#74945d');
  addWalkableArea3D(m);addCityRoadNetwork3D(m);
  for(let i=0;i<360;i++){
   const x=-22+((i*73)%438)/10,z=-22+((i*127)%438)/10;
