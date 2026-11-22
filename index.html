@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b27">
 <meta name="description" content="SIM Cuba: simulador de vida 3D low-poly ambientado en Cuba, con creador visual de personajes y ciudad explorable.">
-<title>SIM Cuba — Límites de dibujado extendidos 0.50</title>
+<title>SIM Cuba — Precisión de profundidad corregida 0.51</title>
 <style>
 :root{color-scheme:dark;--cream:#f2e8cc;--muted:#b6c6b7;--green:#a7cf8a;--gold:#e6c779;--line:#ffffff30}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172b27;color:var(--cream);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:#29413a;border-radius:10px;padding:10px 13px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -721,7 +721,7 @@
 }
 
 
-/* SIM Cuba 0.50 — límites near/far extendidos sin alterar el zoom */
+/* SIM Cuba 0.51 — rango de profundidad equilibrado para evitar desapariciones */
 .game-panel:not(.phone-mode){width:min(460px,calc(100vw - 28px));padding:15px}
 .game-action-list{gap:7px;margin-top:12px}
 .game-action{min-height:57px;padding:8px 9px;gap:8px}
@@ -931,7 +931,7 @@
     <button class="randomize-btn" id="randomizeBtn" type="button">⤨ Sorpréndeme · Aleatorio</button>
    </aside>
   </div>
-  <footer class="creator-footer"><span>SIM CUBA <b>0.50</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
+  <footer class="creator-footer"><span>SIM CUBA <b>0.51</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
  </div>
 </div>
 <script>
@@ -1449,10 +1449,12 @@ function setupCamera(){
  // por lo que una pantalla panorámica o un zoom más abierto obtiene más alcance.
  const baseViewRadius=Math.hypot(baseHalfH*aspect,baseHalfH);
  const viewRadius=Math.hypot(halfW,halfH);
- // Near fija el límite de recorte cercano; Far controla cuánto alcanza a dibujar.
- // Se amplía el rango de profundidad sin tocar el factor de zoom.
- const nearClip=.0001;
- const farClip=100000+Math.max(0,viewRadius-baseViewRadius)*240;
+ // La escena jugable ocupa ±23 unidades; el terreno de fondo llega a ±110.
+ // Incluso con jugador y desplazamiento de cámara en sus topes, 240 unidades
+ // cubren el escenario completo. Un far enorme desperdicia precisión del depth buffer
+ // y hace que superficies cercanas compitan y desaparezcan al alejar la cámara.
+ const nearClip=.1;
+ const farClip=240;
  const view=matLookAt(eye,target,[0,1,0]),proj=matOrtho(-halfW,halfW,-halfH,halfH,nearClip,farClip);
  cameraState.target=target;cameraState.eye=eye;cameraState.forward=forward;cameraState.right=right;cameraState.up=up;cameraState.halfH=halfH;cameraState.viewProj=matMul(proj,view);cameraState.ready=true;
 }
