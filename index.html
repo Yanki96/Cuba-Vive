@@ -1341,7 +1341,7 @@
 .domino-mode-group{display:flex;flex-direction:column;gap:7px;min-width:0}
 .domino-mode-group>label{font-size:8px;font-weight:950;letter-spacing:1.1px;color:#a9c0ad}
 .domino-mode-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-.domino-hand-size-choice{grid-template-columns:repeat(2,minmax(0,1fr))}
+.domino-mode-options.is-hand-size{grid-template-columns:repeat(2,minmax(0,1fr))}
 .domino-mode-choice{
  display:flex;min-width:0;min-height:56px;flex-direction:column;align-items:center;justify-content:center;gap:3px;
  padding:7px 4px;border:1px solid #ffffff20;border-radius:10px;background:#ffffff08;color:#dfe6d7;
@@ -3117,7 +3117,7 @@ function dominoTileCanPlay(tile){
  return !dominoGame||dominoGame.board.length===0||tile.a===dominoGame.leftEnd||tile.b===dominoGame.leftEnd||tile.a===dominoGame.rightEnd||tile.b===dominoGame.rightEnd;
 }
 function dominoPipsMarkup(value){
- const layouts={0:[],1:[5],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9],7:[1,2,3,5,7,8,9],8:[1,2,3,4,6,7,8,9],9:[1,2,3,4,5,6,7,8,9]};
+ const layouts={0:[],1:[5],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9],7:[1,3,4,5,6,7,9],8:[1,2,3,4,6,7,8,9],9:[1,2,3,4,5,6,7,8,9]};
  const active=layouts[value]||[];
  let dots='';
  for(let i=1;i<=9;i++)dots+='<i'+(active.includes(i)?' class="is-dot"':'')+'></i>';
@@ -3214,13 +3214,13 @@ function dominoAdvanceTurn(){
 function dominoModeHudMarkup(g){
  const players=dominoConfig.players,handSize=dominoConfig.handSize;
  const playerOptions=[2,3,4].map(n=>'<button type="button" class="domino-mode-choice'+(players===n?' is-selected':'')+'" data-domino-players="'+n+'" aria-pressed="'+(players===n)+'"><b>'+n+'</b><small>jugadores</small></button>').join('');
- const handOptions=[7,10].map(n=>'<button type="button" class="domino-mode-choice domino-hand-size-choice'+(handSize===n?' is-selected':'')+'" data-domino-hand-size="'+n+'" aria-pressed="'+(handSize===n)+'"><b>'+n+'</b><small>fichas por jugador</small></button>').join('');
+ const handOptions=[7,10].map(n=>'<button type="button" class="domino-mode-choice'+(handSize===n?' is-selected':'')+'" data-domino-hand-size="'+n+'" aria-pressed="'+(handSize===n)+'"><b>'+n+'</b><small>fichas por jugador</small></button>').join('');
  const actualSame=players===g.playerCount&&handSize===g.handSize;
  return '<section class="domino-mode-hud">'+
   '<div class="domino-mode-heading"><span><small>CONFIGURA LA PARTIDA</small><b>Modo de juego</b></span><span class="domino-mode-current">'+g.playerCount+' JUG. · '+g.handSize+' FICHAS</span></div>'+
   '<div class="domino-mode-groups">'+
    '<div class="domino-mode-group"><label>PARTICIPANTES</label><div class="domino-mode-options">'+playerOptions+'</div></div>'+
-   '<div class="domino-mode-group"><label>FICHAS INICIALES</label><div class="domino-mode-options">'+handOptions+'</div></div>'+
+   '<div class="domino-mode-group"><label>FICHAS INICIALES</label><div class="domino-mode-options is-hand-size">'+handOptions+'</div></div>'+
   '</div>'+
   '<div class="domino-mode-footer"><span>'+(actualSame?'Modo actual seleccionado':'La selección se aplicará al iniciar')+'</span><button type="button" class="domino-mode-start" data-domino-new-game="true">'+(g.status==='finished'?'JUGAR OTRA PARTIDA':'INICIAR NUEVA PARTIDA')+' <i>↗</i></button></div>'+
  '</section>';
@@ -3424,8 +3424,8 @@ function dominoPassPlayer(){
  g.autoPassPending=false;g.passCount++;g.pendingTile=null;
  g.statusText='No tenías una ficha válida y pasaste turno.';
  if(dominoCheckBlocked())return;
- dominoShowCenterNotice('¡TE PASASTE!','No tienes una ficha que encaje. Juega el siguiente participante.','pass',1650);
  dominoAdvanceTurn();
+ dominoShowCenterNotice('¡TE PASASTE!','No tienes una ficha que encaje. Juega el siguiente participante.','pass',1650);
 }
 function dominoAiTurn(){
  const g=dominoGame,seat=dominoCurrentSeat();if(!g||!seat||seat.id==='player'||g.turn!=='ai')return;
@@ -3438,8 +3438,8 @@ function dominoAiTurn(){
  if(!dominoHasMove(seat.hand)){
   g.passCount++;g.statusText=seat.name+' no tiene una ficha válida y pasó turno.';
   if(dominoCheckBlocked())return;
-  dominoShowCenterNotice('¡'+seat.name+' SE PASÓ!','No tiene una ficha que encaje. Sigue el próximo participante.','ai-pass',1450);
-  dominoAdvanceTurn();return;
+  dominoAdvanceTurn();
+  dominoShowCenterNotice('¡'+seat.name+' SE PASÓ!','No tiene una ficha que encaje. Sigue el próximo participante.','ai-pass',1450);return;
  }
  const choices=[];
  for(const t of seat.hand){
