@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b27">
 <meta name="description" content="SIM Cuba: simulador de vida 3D low-poly ambientado en Cuba, con creador visual de personajes y ciudad explorable.">
-<title>SIM Cuba — Gran mapa verde 0.83</title>
+<title>SIM Cuba — Red vial conectada 0.88</title>
 <style>
 :root{color-scheme:dark;--cream:#f2e8cc;--muted:#b6c6b7;--green:#a7cf8a;--gold:#e6c779;--line:#ffffff30}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172b27;color:var(--cream);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:#29413a;border-radius:10px;padding:10px 13px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -1817,8 +1817,13 @@ const CITY_ROADS=[-20,-10,0,10,20];
 const OUTER_ROADS=[-60,-40,40,60];
 const MAIN_ROADS=[0]; // Una avenida norte-sur y otra este-oeste llegan hasta el borde del mapa.
 const MAP_ROADS=[...CITY_ROADS,...OUTER_ROADS];
-const CITY_EDGE=70.5;
+const CITY_EDGE=68.0; // Anillo rural: conecta las calles sin prolongarlas hasta el borde del mapa.
 const MAP_EDGE=100;
+function roadCorridorNear(x,z,clear=1.34){
+ if(MAP_ROADS.some(r=>Math.abs(x-r)<clear||Math.abs(z-r)<clear))return true;
+ const withinRing=Math.abs(x)<=CITY_EDGE+clear&&Math.abs(z)<=CITY_EDGE+clear;
+ return withinRing&&(Math.abs(Math.abs(x)-CITY_EDGE)<clear||Math.abs(Math.abs(z)-CITY_EDGE)<clear);
+}
 const $=id=>document.getElementById(id);
 const CREATOR_SKIN={ '🏻':'#f0c9a6','🏼':'#dfae87','🏽':'#bd8965','🏾':'#8d5a3e','🏿':'#603b2b' };
 const ACCESSORY_NAMES={glasses:'Gafas',cap:'Gorra',backpack:'Mochila',chain:'Cadena',watch:'Reloj',earrings:'Pendientes',bracelet:'Pulsera',bandana:'Pañuelo'};
@@ -2040,10 +2045,52 @@ function drawPerson(x,y,isPlayer=false,npcIndex=0){
 
 function buildCityObjects(){
  const out=[],rng=(()=>{let s=0x51c0ba;return ()=>{s=(Math.imul(s,1664525)+1013904223)>>>0;return s/4294967296}})();
+ const buildingFitsRoad=(x,z,w,d)=>{
+  const bx=x-.13,bz=z-.13,bw=w+.26,bd=d+.26,clear=1.34;
+  for(const r of MAP_ROADS){
+   if(bx<r+clear&&bx+bw>r-clear)return false;
+   if(bz<r+clear&&bz+bd>r-clear)return false;
+  }
+  const inRingSpan=(a,b)=>a<CITY_EDGE+clear&&b>-CITY_EDGE-clear;
+  for(const side of [-1,1]){
+   const line=side*CITY_EDGE;
+   if(inRingSpan(bz,bz+bd)&&bx<line+clear&&bx+bw>line-clear)return false;
+   if(inRingSpan(bx,bx+bw)&&bz<line+clear&&bz+bd>line-clear)return false;
+  }
+  return true;
+ };
+ const buildingFitsObjects=(x,z,w,d)=>{
+  const bx=x-.13,bz=z-.13,bw=w+.26,bd=d+.26,gap=.08;
+  for(const q of out){
+   const b=q.block;if(!b)continue;
+   if(b.type==='rect'){
+    const dx=Math.max(b.x-(bx+bw),bx-(b.x+b.w),0),dz=Math.max(b.y-(bz+bd),bz-(b.y+ b.d),0);
+    if(dx*dx+dz*dz<gap*gap)return false;
+   }else{
+    const dx=Math.max(b.x-(bx+bw),bx-b.x,0),dz=Math.max(b.y-(bz+bd),bz-b.y,0);
+    if(dx*dx+dz*dz<(b.r+gap)*(b.r+gap))return false;
+   }
+  }
+  return true;
+ };
+ const findBuildingPosition=(x,z,w,d)=>{
+  const valid=(px,pz)=>Math.abs(px)+w<MAP_EDGE-1&&Math.abs(pz)+d<MAP_EDGE-1&&buildingFitsRoad(px,pz,w,d)&&buildingFitsObjects(px,pz,w,d);
+  if(valid(x,z))return {x,z};
+  for(let radius=.35;radius<=8;radius+=.35){
+   for(let i=0;i<16;i++){
+    const a=i*Math.PI/8,px=x+Math.cos(a)*radius,pz=z+Math.sin(a)*radius;
+    if(valid(px,pz))return {x:px,z:pz};
+   }
+  }
+  return null;
+ };
  const addBuilding=(x,z,w,d,style,variant)=>{
+  const position=findBuildingPosition(x,z,w,d);
+  if(!position)return false;
   const shopStyles=['bodega','market','restaurant','workshop'];
   const type=shopStyles.includes(style)?'shop':'house';
-  out.push({type,style,x,y:z,w,d,variant:variant%8,block:{type:'rect',x:x-.13,y:z-.13,w:w+.26,d:d+.26}});
+  out.push({type,style,x:position.x,y:position.z,w,d,variant:variant%8,block:{type:'rect',x:position.x-.13,y:position.z-.13,w:w+.26,d:d+.26}});
+  return true;
  };
  const add=(type,x,z,extra={},block=null)=>out.push({type,x,y:z,...extra,...(block?{block}:{})});
  const centers=CITY_ROADS;
@@ -2108,7 +2155,7 @@ function buildCityObjects(){
  // jardineras y postes eléctricos en aceras, nunca en mitad de la calzada.
  const canPlaceProp=(x,z,r,clear=.18)=>{
   if(Math.abs(x)>MAP_EDGE-1||Math.abs(z)>MAP_EDGE-1)return false;
-  if(MAP_ROADS.some(v=>Math.abs(x-v)<1.34||Math.abs(z-v)<1.34))return false;
+  if(roadCorridorNear(x,z,1.34))return false;
   for(const q of out){if(!q.block)continue;const b=q.block;
    if(b.type==='rect'){const dx=Math.max(b.x-x,0,x-(b.x+b.w)),dz=Math.max(b.y-z,0,z-(b.y+b.d));if(dx*dx+dz*dz<(r+clear)*(r+clear))return false}
    else if(Math.hypot(x-b.x,z-b.y)<r+b.r+clear)return false;
@@ -2193,20 +2240,33 @@ function buildCityObjects(){
 
  // Cuatro poblados satélite en los caminos cardinales, además de las fincas diagonales.
  const satelliteVillages=[
-  {x:0,z:-54,style:'colonial',shop:'bodega'},
-  {x:0,z:54,style:'house',shop:'market'},
-  {x:-54,z:0,style:'colonial',shop:'workshop'},
-  {x:54,z:0,style:'house',shop:'restaurant'}
+  {x:0,z:-54,axis:'ns',style:'colonial',shop:'bodega'},
+  {x:0,z:54,axis:'ns',style:'house',shop:'market'},
+  {x:-54,z:0,axis:'ew',style:'colonial',shop:'workshop'},
+  {x:54,z:0,axis:'ew',style:'house',shop:'restaurant'}
  ];
  satelliteVillages.forEach((v,index)=>{
-  addBuilding(v.x-3.7,v.z-2.8,2.5,2.4,v.style,index+2);
-  addBuilding(v.x+.9,v.z-2.9,2.4,2.35,'house',index+4);
-  addBuilding(v.x-1.3,v.z+2.1,2.6,2.35,v.shop,index+1);
-  add('clothes',v.x-4.0,v.z+1.1,{}, {type:'circle',x:v.x-4.0,y:v.z+1.1,r:.38});
-  add('lamp',v.x+4.3,v.z+.3,{}, {type:'circle',x:v.x+4.3,y:v.z+.3,r:.16});
-  add('bench',v.x+.4,v.z+5.2,{}, {type:'circle',x:v.x+.4,y:v.z+5.2,r:.30});
-  for(const [dx,dz,variant] of [[-5,-5,2],[5,-4,0],[-5,4,1],[5,5,2]])
-   place('tree',v.x+dx,v.z+dz,{variant},.40);
+  if(v.axis==='ns'){
+   // Los edificios quedan en la manzana entre las avenidas x=0 y x=10.
+   addBuilding(1.55,v.z-2.8,2.5,2.4,v.style,index+2);
+   addBuilding(6.05,v.z-2.9,2.4,2.35,'house',index+4);
+   addBuilding(3.75,v.z+2.1,2.6,2.35,v.shop,index+1);
+   add('clothes',2.1,v.z+1.1,{}, {type:'circle',x:2.1,y:v.z+1.1,r:.38});
+   add('lamp',8.1,v.z+.3,{}, {type:'circle',x:8.1,y:v.z+.3,r:.16});
+   add('bench',5.5,v.z+5.2,{}, {type:'circle',x:5.5,y:v.z+5.2,r:.30});
+   for(const [dx,dz,variant] of [[-1.8,-5,2],[3.8,-4,0],[-.2,4,1],[2.2,5,2]])
+    place('tree',5.1+dx,v.z+dz,{variant},.40);
+  }else{
+   // Los pueblos este y oeste se orientan al otro lado de la avenida z=0.
+   addBuilding(v.x-3.7,1.55,2.5,2.4,v.style,index+2);
+   addBuilding(v.x+.9,4.05,2.4,2.35,'house',index+4);
+   addBuilding(v.x-2.2,6.0,2.6,2.35,v.shop,index+1);
+   add('clothes',v.x-4.0,5.2,{}, {type:'circle',x:v.x-4.0,y:5.2,r:.38});
+   add('lamp',v.x+4.3,5.5,{}, {type:'circle',x:v.x+4.3,y:5.5,r:.16});
+   add('bench',v.x+.4,5.2,{}, {type:'circle',x:v.x+.4,y:5.2,r:.30});
+   for(const [dx,dz,variant] of [[-5,-1.7,2],[5,-.8,0],[-5,2.7,1],[5,2.9,2]])
+    place('tree',v.x+dx,5.1+dz,{variant},.40);
+  }
  });
 
  // Pequeños bosques de palmas y frutales. Se plantan en grupos irregulares,
@@ -2245,7 +2305,7 @@ function buildCityObjects(){
  // Más zonas húmedas y orillas verdes en el campo exterior.
  add('pond',-57,-29,{rx:1.7,rz:1.25},{type:'circle',x:-57,y:-29,r:1.90});
  add('pond',56,31,{rx:1.9,rz:1.35},{type:'circle',x:56,y:31,r:2.05});
- add('pond',-28,59,{rx:1.35,rz:1.0},{type:'circle',x:-28,y:59,r:1.55});
+ add('pond',-28,55.2,{rx:1.35,rz:1.0},{type:'circle',x:-28,y:55.2,r:1.55});
 
  // Palmeras, árboles frutales y árboles de sombra por las afueras.
  // Se conserva el presupuesto total de objetos y se distribuye en los 200 × 200.
@@ -2739,13 +2799,7 @@ function addCityRoadNetwork3D(m){
   for(let x=a+.35;x<b-.25;x+=3.6)m.box(x,.058,rz-.018,Math.min(1.25,b-x),.012,.045,'#d9c991','#d9c991','#cbb982');
  for(const rx of CITY_ROADS)for(const [a,b] of roadIntervals(-edge+1,edge-1,CITY_ROADS,1.65))
   for(let z=a+.35;z<b-.25;z+=3.6)m.box(rx-.018,.058,z,.045,.012,Math.min(1.25,b-z),'#d9c991','#d9c991','#cbb982');
- // Los caminos rurales siguen siendo de tierra y terminan dentro del terreno.
- // Cada extremo tiene un pequeño ensanche de grava, como una zona de giro.
- for(const r of OUTER_ROADS)for(const sign of [-1,1]){
-  const padX=sign>0?edge-2.25:-edge,padZ=sign>0?edge-2.25:-edge;
-  m.box(padX,.004,r-1.06,2.25,.028,2.12,'#a08d69','#8d7958','#756747');
-  m.box(r-1.06,.004,padZ,2.12,.028,2.25,'#a08d69','#8d7958','#756747');
- }
+ // Caminos de tierra y calles laterales: se detienen en el anillo rural, no en el césped.
  for(const r of OUTER_ROADS){
   m.box(-edge,.010,r-.46,edge*2,.040,.92,'#897958','#76664b','#65583f');
   m.box(r-.46,.010,-edge,.92,.040,edge*2,'#897958','#76664b','#65583f');
@@ -2754,12 +2808,16 @@ function addCityRoadNetwork3D(m){
    m.box(r+side*.59,.014,-edge,.12,.025,edge*2,'#b7a47a','#a18d67','#8c7958');
   }
  }
- // Piedras bajas a ambos lados de cada final: rematan visualmente los caminos.
- for(const r of OUTER_ROADS)for(const sign of [-1,1])for(const side of [-1,1]){
-  const x=sign*(edge-.32),z=r+side*.84;
-  m.sphere(x,.15,z,.22,.14,.21,'#777b68',5,2);
-  const vx=r+side*.84,vz=sign*(edge-.32);
-  m.sphere(vx,.14,vz,.21,.13,.20,'#85836d',5,2);
+ // Circuito perimetral de tierra: enlaza las ocho salidas de los caminos rurales y
+ // los extremos de las calles urbanas, formando una red continua sin calles cortadas.
+ for(const side of [-1,1]){
+  const line=side*edge;
+  m.box(-edge,.010,line-.46,edge*2,.040,.92,'#897958','#76664b','#65583f');
+  m.box(line-.46,.010,-edge,.92,.040,edge*2,'#897958','#76664b','#65583f');
+  for(const offset of [-.59,.59]){
+   m.box(-edge,.014,line+offset,edge*2,.025,.12,'#b7a47a','#a18d67','#8c7958');
+   m.box(line+offset,.014,-edge,.12,.025,edge*2,'#b7a47a','#a18d67','#8c7958');
+  }
  }
  // Solo dos carreteras principales, asfaltadas, prolongan los ejes centrales
  // desde la ciudad hasta el borde exterior del mapa.
@@ -2845,7 +2903,7 @@ function addStaticWorld(m){
  const detailSpan=MAP_EDGE*20;
  for(let i=0;i<2300;i++){
   const x=-MAP_EDGE+((i*73)%detailSpan)/10,z=-MAP_EDGE+((i*127)%detailSpan)/10;
-  if(isBlocked(x,z,obstacles())||MAP_ROADS.some(r=>Math.abs(x-r)<1.32||Math.abs(z-r)<1.32))continue;
+  if(isBlocked(x,z,obstacles())||roadCorridorNear(x,z,1.32))continue;
   m.box(x,.003,z,.10+(i%3)*.045,.012,.10+(i%2)*.05,['#9dbd7c','#a8c585','#8eae6d'][i%3]);
  }
  for(const o of sceneObjects()){
@@ -3077,19 +3135,24 @@ function draw2D(){if(!ctx)return;const s=worldScale(),viewFocusX=cameraFocusX(),
   }
  }
 
- // Ensanches de grava bajo los extremos de los caminos rurales.
- for(const r of OUTER_ROADS)for(const sign of [-1,1]){
-  const padX=sign>0?CITY_EDGE-2.25:-CITY_EDGE,padZ=sign>0?CITY_EDGE-2.25:-CITY_EDGE;
-  groundPath([[padX,r-1.06],[padX+2.25,r-1.06],[padX+2.25,r+1.06],[padX,r+1.06]],'#a08d69','#786b50');
-  groundPath([[r-1.06,padZ],[r+1.06,padZ],[r+1.06,padZ+2.25],[r-1.06,padZ+2.25]],'#a08d69','#786b50');
- }
- // Caminos rurales de tierra: conectan los poblados, pero no salen del terreno.
+ // Caminos rurales enlazados con el circuito exterior.
  for(const r of OUTER_ROADS){
   groundPath([[-CITY_EDGE,r-.46],[CITY_EDGE,r-.46],[CITY_EDGE,r+.46],[-CITY_EDGE,r+.46]],'#897958','#65583f');
   groundPath([[r-.46,-CITY_EDGE],[r+.46,-CITY_EDGE],[r+.46,CITY_EDGE],[r-.46,CITY_EDGE]],'#897958','#65583f');
   for(const side of [-1,1]){
    groundPath([[-CITY_EDGE,r+side*.53],[CITY_EDGE,r+side*.53],[CITY_EDGE,r+side*.65],[-CITY_EDGE,r+side*.65]],'#b7a47a','#8c7958');
    groundPath([[r+side*.53,-CITY_EDGE],[r+side*.65,-CITY_EDGE],[r+side*.65,CITY_EDGE],[r+side*.53,CITY_EDGE]],'#b7a47a','#8c7958');
+  }
+ }
+ // El anillo rural conecta caminos y calles de los cuatro lados.
+ for(const side of [-1,1]){
+  const line=side*CITY_EDGE;
+  groundPath([[-CITY_EDGE,line-.46],[CITY_EDGE,line-.46],[CITY_EDGE,line+.46],[-CITY_EDGE,line+.46]],'#897958','#65583f');
+  groundPath([[line-.46,-CITY_EDGE],[line+.46,-CITY_EDGE],[line+.46,CITY_EDGE],[line-.46,CITY_EDGE]],'#897958','#65583f');
+  for(const offset of [-.59,.59]){
+   const z=line+offset,x=line+offset;
+   groundPath([[-CITY_EDGE,z-.06],[CITY_EDGE,z-.06],[CITY_EDGE,z+.06],[-CITY_EDGE,z+.06]],'#b7a47a','#8c7958');
+   groundPath([[x-.06,-CITY_EDGE],[x+.06,-CITY_EDGE],[x+.06,CITY_EDGE],[x-.06,CITY_EDGE]],'#b7a47a','#8c7958');
   }
  }
  // Solo las dos carreteras principales continúan hasta el borde del mapa.
@@ -3111,18 +3174,7 @@ function draw2D(){if(!ctx)return;const s=worldScale(),viewFocusX=cameraFocusX(),
    groundPath([[mark,-.025],[mark+.90,-.025],[mark+.90,.025],[mark,.025]],'#e6d8a3','#d2c38f');
   }
  }
- // Piedras decorativas junto a los ensanches: el final del camino queda rematado.
- ctx.save();
- for(const r of OUTER_ROADS)for(const sign of [-1,1])for(const side of [-1,1]){
-  const stones=[[sign*(CITY_EDGE-.32),r+side*.84],[r+side*.84,sign*(CITY_EDGE-.32)]];
-  for(let i=0;i<stones.length;i++){
-   const p=iso(stones[i][0],stones[i][1]),rx=(i===0?6:5.5)*s,ry=(i===0?3.8:3.5)*s;
-   ctx.fillStyle=i===0?'#777b68':'#85836d';ctx.beginPath();ctx.ellipse(p[0],p[1],rx,ry,0,0,Math.PI*2);ctx.fill();
-   ctx.strokeStyle='#59624f';ctx.lineWidth=Math.max(1,1.2*s);ctx.stroke();
-   ctx.fillStyle='#a4a28a';ctx.beginPath();ctx.ellipse(p[0]-rx*.22,p[1]-ry*.28,rx*.28,ry*.22,0,0,Math.PI*2);ctx.fill();
-  }
- }
- ctx.restore();
+
  // House patios are driven by the exact same footprint used by collision checks.
  for(const o of sceneObjects())if(o.type==='house'||o.type==='shop')drawPavedPad(o.x-.06,o.y-.06,o.w+.12,o.d+.12,'#b8aa8a');
  if(zone==='parque'){
@@ -3143,7 +3195,7 @@ function draw2D(){if(!ctx)return;const s=worldScale(),viewFocusX=cameraFocusX(),
 }
 
 function decorationSpotFree(x,y,margin=.38){
- if(MAP_ROADS.some(r=>Math.abs(x-r)<1.28||Math.abs(y-r)<1.28))return false;
+ if(roadCorridorNear(x,y,1.28))return false;
  for(const o of sceneObjects()){
   if(o.block&&nearBlock(o.block,x,y,margin))return false;
   if((o.type==='house'||o.type==='shop')&&nearBlock({type:'rect',x:o.x-.2,y:o.y-.2,w:o.w+.4,d:o.d+.4},x,y,margin))return false;
