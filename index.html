@@ -1814,8 +1814,9 @@ const AUTO_START_KEY='simcuba.autostart.v1';
 const MOVE_SPEED=2.8; // unidades del mundo por segundo; velocidad continua independiente del zoom
 const NAV={minX:-100,minY:-100,step:.2,nx:1001,ny:1001}; // 200 × 200 unidades con una resolución de navegación de 20 cm.
 const CITY_ROADS=[-20,-10,0,10,20];
-const OUTER_ROADS=[-60,-40,40,60];
-const MAP_ROADS=[...CITY_ROADS,...OUTER_ROADS];
+const MAIN_ROAD_NS=10,MAIN_ROAD_EW=-10; // Las dos avenidas principales enlazan la ciudad con los límites.
+const OUTER_ROADS=[]; // Se elimina la antigua cuadrícula rural de ocho caminos.
+const MAP_ROADS=[...CITY_ROADS];
 const CITY_EDGE=70.5;
 const MAP_EDGE=100;
 const $=id=>document.getElementById(id);
@@ -2738,13 +2739,17 @@ function addCityRoadNetwork3D(m){
   for(let x=a+.35;x<b-.25;x+=3.6)m.box(x,.058,rz-.018,Math.min(1.25,b-x),.012,.045,'#d9c991','#d9c991','#cbb982');
  for(const rx of CITY_ROADS)for(const [a,b] of roadIntervals(-edge+1,edge-1,CITY_ROADS,1.65))
   for(let z=a+.35;z<b-.25;z+=3.6)m.box(rx-.018,.058,z,.045,.012,Math.min(1.25,b-z),'#d9c991','#d9c991','#cbb982');
- // Caminos secundarios de tierra compactada que conectan fincas y poblados.
- for(const r of OUTER_ROADS){
-  m.box(-ruralEdge,.010,r-.46,ruralEdge*2,.040,.92,'#897958','#76664b','#65583f');
-  m.box(r-.46,.010,-ruralEdge,.92,.040,ruralEdge*2,'#897958','#76664b','#65583f');
+ // Dos avenidas principales: una norte-sur y otra este-oeste.
+ // Sus coordenadas coinciden con calles urbanas y no atraviesan edificios satélite.
+ for(const sign of [-1,1]){
+  const x0=sign>0?edge:-ruralEdge,z0=sign>0?edge:-ruralEdge,len=ruralEdge-edge;
+  // Continuación norte-sur por la calle X=10.
+  m.box(MAIN_ROAD_NS-.46,.010,z0,.92,.040,len,'#897958','#76664b','#65583f');
+  // Continuación este-oeste por la calle Z=-10.
+  m.box(x0,.010,MAIN_ROAD_EW-.46,len,.040,.92,'#897958','#76664b','#65583f');
   for(const side of [-1,1]){
-   m.box(-ruralEdge,.014,r+side*.59,ruralEdge*2,.025,.12,'#b7a47a','#a18d67','#8c7958');
-   m.box(r+side*.59,.014,-ruralEdge,.12,.025,ruralEdge*2,'#b7a47a','#a18d67','#8c7958');
+   m.box(MAIN_ROAD_NS+side*.59-.06,.014,z0,.12,.025,len,'#b7a47a','#a18d67','#8c7958');
+   m.box(x0,.014,MAIN_ROAD_EW+side*.59-.06,len,.025,.12,'#b7a47a','#a18d67','#8c7958');
   }
  }
  // Pasos peatonales en los cuatro accesos a cada cruce, sin invadir el centro del cruce.
@@ -2788,9 +2793,27 @@ function addCar3D(m,o){
   const p=localPoint(x,z,yaw,[side*.61,.34,.18]);m.sphere(p[0],p[1],p[2],.075,.055,.05,'#e7d79c',6,3);
  }
 }
+function addMapFog3D(m){
+ // Anillos de color progresivo sobre el suelo; no usan transparencias ni partículas.
+ const bands=[
+  {inner:MAP_EDGE,outer:108,color:'#b6c4ae'},
+  {inner:108,outer:124,color:'#c4cec0'},
+  {inner:124,outer:165,color:'#d1d9ce'}
+ ];
+ const wasBaking=m.bakeLighting;
+ m.bakeLighting=false; // La niebla es plana: evita subdividir grandes superficies y ahorra CPU/memoria.
+ for(const band of bands){
+  const {inner,outer,color}=band,span=outer-inner,y=.002,h=.012;
+  m.box(-outer,y,-outer,outer*2,h,span,color,color,color);
+  m.box(-outer,y,inner,outer*2,h,span,color,color,color);
+  m.box(-outer,y,-inner,span,h,inner*2,color,color,color);
+  m.box(inner,y,-inner,span,h,inner*2,color,color,color);
+ }
+ m.bakeLighting=wasBaking;
+}
 function addStaticWorld(m){
- // Terreno y detalles cubren el mundo completo; el número de detalles se mantiene fijo.
- m.box(-110,-.34,-110,220,.34,220,'#8eaf70','#85a568','#74945d');
+ // La base continúa lejos del límite; el exterior se pinta en capas de niebla.
+ m.box(-250,-.34,-250,500,.34,500,'#d1d9ce','#c7d1c5','#b7c3b5');
  addWalkableArea3D(m);addCityRoadNetwork3D(m);
  const detailSpan=MAP_EDGE*20;
  for(let i=0;i<2300;i++){
@@ -2822,6 +2845,7 @@ function addStaticWorld(m){
  if(zone==='parque'){
   m.cylinder(0,.005,0,1.10,1.10,.035,'#75a9a2',12);m.sphere(0,.035,0,.95,.025,.95,'#78b6ae',12,3);
  }
+ addMapFog3D(m);
 }
 function localPoint(rootX,rootZ,yaw,p){const c=Math.cos(yaw),s=Math.sin(yaw);return [rootX+p[0]*c+p[2]*s,p[1],rootZ-p[0]*s+p[2]*c]}
 function localBox(m,rootX,rootZ,yaw,cx,cy,cz,w,h,d,top,front,side){
@@ -2976,6 +3000,28 @@ function scheduleCameraDraw(){
  requestAnimationFrame(()=>{cameraDrawPending=false;draw()});
 }
 
+function drawMapFog2D(){
+ // El límite cuadrado del mundo se proyecta como un rombo en el modo isométrico.
+ const corners=[
+  iso(-MAP_EDGE,-MAP_EDGE),iso(MAP_EDGE,-MAP_EDGE),
+  iso(MAP_EDGE,MAP_EDGE),iso(-MAP_EDGE,MAP_EDGE)
+ ];
+ ctx.save();ctx.beginPath();ctx.rect(0,0,W,H);
+ ctx.moveTo(corners[0][0],corners[0][1]);
+ for(let i=1;i<corners.length;i++)ctx.lineTo(corners[i][0],corners[i][1]);
+ ctx.closePath();
+ ctx.fillStyle='rgba(195,207,194,.94)';ctx.fill('evenodd');
+ ctx.restore();
+ // Halo difuso para suavizar visualmente el final del mundo.
+ ctx.save();ctx.beginPath();
+ ctx.moveTo(corners[0][0],corners[0][1]);
+ for(let i=1;i<corners.length;i++)ctx.lineTo(corners[i][0],corners[i][1]);
+ ctx.closePath();ctx.lineJoin='round';
+ ctx.shadowColor='rgba(222,230,218,.82)';ctx.shadowBlur=24;
+ ctx.strokeStyle='rgba(210,220,208,.48)';ctx.lineWidth=15;ctx.stroke();
+ ctx.shadowBlur=0;ctx.strokeStyle='rgba(190,204,190,.72)';ctx.lineWidth=2;ctx.stroke();
+ ctx.restore();
+}
 function draw2D(){if(!ctx)return;const s=worldScale(),viewFocusX=cameraFocusX(),viewFocusY=cameraFocusZ();
  ctx.fillStyle='#9fba79';ctx.fillRect(0,0,W,H);
  // Base de césped limpia: solo pequeñas variaciones de píxeles, sin rombos grandes.
@@ -3000,10 +3046,16 @@ function draw2D(){if(!ctx)return;const s=worldScale(),viewFocusX=cameraFocusX(),
   }
  }
 
- // Accesos rurales de tierra, más estrechos que las avenidas del casco urbano.
- for(const r of OUTER_ROADS){
-  groundPath([[-MAP_EDGE,r-.46],[MAP_EDGE,r-.46],[MAP_EDGE,r+.46],[-MAP_EDGE,r+.46]],'#897958','#65583f');
-  groundPath([[r-.46,-MAP_EDGE],[r+.46,-MAP_EDGE],[r+.46,MAP_EDGE],[r-.46,MAP_EDGE]],'#897958','#65583f');
+ // Solo dos avenidas rurales continúan fuera del casco urbano hasta el borde del mapa.
+ for(const sign of [-1,1]){
+  const x0=sign>0?CITY_EDGE:-MAP_EDGE,x1=sign>0?MAP_EDGE:-CITY_EDGE;
+  const z0=sign>0?CITY_EDGE:-MAP_EDGE,z1=sign>0?MAP_EDGE:-CITY_EDGE;
+  groundPath([[MAIN_ROAD_NS-.46,z0],[MAIN_ROAD_NS+.46,z0],[MAIN_ROAD_NS+.46,z1],[MAIN_ROAD_NS-.46,z1]],'#897958','#65583f');
+  groundPath([[x0,MAIN_ROAD_EW-.46],[x1,MAIN_ROAD_EW-.46],[x1,MAIN_ROAD_EW+.46],[x0,MAIN_ROAD_EW+.46]],'#897958','#65583f');
+  for(const side of [-1,1]){
+   groundPath([[MAIN_ROAD_NS+side*.53,z0],[MAIN_ROAD_NS+side*.65,z0],[MAIN_ROAD_NS+side*.65,z1],[MAIN_ROAD_NS+side*.53,z1]],'#b7a47a','#8c7958');
+   groundPath([[x0,MAIN_ROAD_EW+side*.53],[x1,MAIN_ROAD_EW+side*.53],[x1,MAIN_ROAD_EW+side*.65],[x0,MAIN_ROAD_EW+side*.65]],'#b7a47a','#8c7958');
+  }
  }
  // House patios are driven by the exact same footprint used by collision checks.
  for(const o of sceneObjects())if(o.type==='house'||o.type==='shop')drawPavedPad(o.x-.06,o.y-.06,o.w+.12,o.d+.12,'#b8aa8a');
@@ -3021,6 +3073,7 @@ function draw2D(){if(!ctx)return;const s=worldScale(),viewFocusX=cameraFocusX(),
  layers.sort((a,b)=>a.depth-b.depth);layers.forEach(layer=>layer.drawFn());
  if(zone==='barrio'||zone==='centro'){const drain=iso(4.6,4.75);rectPx(drain[0]-5*s,drain[1]-1*s,10*s,3*s,'#46544c');for(let i=0;i<3;i++)rectPx(drain[0]-4*s+i*3*s,drain[1],1*s,2*s,'#a9b4a0')}
  if(clickTarget){const m=iso(clickTarget.x,clickTarget.y);screenPoly([[m[0],m[1]-7*s],[m[0]+13*s,m[1]],[m[0],m[1]+7*s],[m[0]-13*s,m[1]]],'#f8e39b22','#fff0a2',1.5*s)}
+ drawMapFog2D();
 }
 
 function decorationSpotFree(x,y,margin=.38){
