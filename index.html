@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b27">
 <meta name="description" content="SIM Cuba: simulador de vida 3D low-poly ambientado en Cuba, con creador visual de personajes y ciudad explorable.">
-<title>SIM Cuba — Comercios, empleo y dominó 0.68</title>
+<title>SIM Cuba — Comercios, empleo y dominó 0.69</title>
 <style>
 :root{color-scheme:dark;--cream:#f2e8cc;--muted:#b6c6b7;--green:#a7cf8a;--gold:#e6c779;--line:#ffffff30}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172b27;color:var(--cream);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:#29413a;border-radius:10px;padding:10px 13px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -1137,6 +1137,48 @@
  .domino-arm-layout .domino-chain-piece.is-vertical .domino-pip-grid i{width:3.2px;height:3.2px;}
 }
 
+
+/* SIM Cuba 0.69 — aviso animado y pase automático del dominó */
+.domino-auto-pass{
+ position:relative;display:flex;align-items:center;justify-content:center;gap:12px;
+ min-height:76px;padding:13px 16px;overflow:hidden;border:1px solid #e5cc7a88;
+ border-radius:14px;background:linear-gradient(115deg,#e2c87925,#b6d58a18 55%,#e2c87912);
+ box-shadow:inset 0 0 22px #d5c47b0d,0 7px 22px #0003;
+ animation:dominoPassArrival .46s cubic-bezier(.2,.8,.2,1) both;
+}
+.domino-auto-pass-icon{
+ display:grid;place-items:center;flex:0 0 40px;width:40px;height:40px;
+ border:1px solid #e5d28b77;border-radius:50%;background:#e5d28b1b;
+ color:#f3df9d;font-size:24px;font-weight:900;
+ animation:dominoPassIcon 1s ease-in-out infinite;
+}
+.domino-auto-pass-copy{display:flex;flex-direction:column;gap:4px;text-align:left}
+.domino-auto-pass-copy b{
+ color:#f5dfa0;font-size:18px;font-weight:950;letter-spacing:.4px;
+ text-shadow:0 2px 12px #e5c87555;
+}
+.domino-auto-pass-copy small{color:#d0d9c8;font-size:10px;line-height:1.35}
+.domino-auto-pass-glint{
+ position:absolute;top:-50%;left:-35%;width:23%;height:200%;
+ transform:rotate(22deg);background:linear-gradient(90deg,transparent,#fff4,transparent);
+ animation:dominoPassGlint 1.35s ease-out both;pointer-events:none;
+}
+@keyframes dominoPassArrival{
+ from{opacity:0;transform:translateY(10px) scale(.97)}
+ to{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes dominoPassIcon{
+ 0%,100%{transform:translateX(0) rotate(0);box-shadow:0 0 0 #e5d28b00}
+ 50%{transform:translateX(3px) rotate(-7deg);box-shadow:0 0 16px #e5d28b44}
+}
+@keyframes dominoPassGlint{
+ from{left:-35%;opacity:0}
+ 25%{opacity:1}
+ to{left:120%;opacity:0}
+}
+@media(prefers-reduced-motion:reduce){
+ .domino-auto-pass,.domino-auto-pass-icon,.domino-auto-pass-glint{animation:none!important}
+}
 </style>
 </head>
 <body>
@@ -1327,7 +1369,7 @@
     <button class="randomize-btn" id="randomizeBtn" type="button">⤨ Sorpréndeme · Aleatorio</button>
    </aside>
   </div>
-  <footer class="creator-footer"><span>SIM CUBA <b>0.68</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
+  <footer class="creator-footer"><span>SIM CUBA <b>0.69</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
  </div>
 </div>
 <script>
@@ -1417,7 +1459,7 @@ const needs={hunger:82,energy:86,hygiene:90,fun:68,social:55,health:100};
 const inventory={bread:0,snack:0,meal:0,juice:0};
 const dominoStats={wins:0,losses:0,draws:0};
 let job=null,needAccumulator=0,autosaveMinutes=0,quest={bought:false,employed:false,worked:false},nearbyContext=null,pendingInteraction=null;
-let activeWorkShift=null,dominoGame=null,dominoAiTimer=null,dominoGameSerial=0;
+let activeWorkShift=null,dominoGame=null,dominoAiTimer=null,dominoPassTimer=null,dominoGameSerial=0;
 const SAVE_KEY='simcuba.save.v021'; // Mantiene compatibilidad con partidas anteriores
 const AUTO_START_KEY='simcuba.autostart.v1';
 const MOVE_SPEED=2.8; // unidades del mundo por segundo; velocidad continua independiente del zoom
@@ -2647,7 +2689,9 @@ function openProfile(){
 function escapeHTML(value){return String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
 function closeGamePanel(){
  if(activeWorkShift){activeWorkShift=null;toast('Turno cancelado. No se realizó el pago.')}
- if(dominoGame){if(dominoAiTimer){clearTimeout(dominoAiTimer);dominoAiTimer=null}dominoGame=null}
+ if(dominoAiTimer){clearTimeout(dominoAiTimer);dominoAiTimer=null}
+ if(dominoPassTimer){clearTimeout(dominoPassTimer);dominoPassTimer=null}
+ if(dominoGame)dominoGame=null
  const modal=$('gameModal'),panel=$('gamePanel');if(!modal||!panel)return;
  if(panel.classList.contains('phone-mode')&&!modal.classList.contains('hidden')){
   if(phoneCloseTimer)clearTimeout(phoneCloseTimer);
@@ -2990,8 +3034,7 @@ function dominoRender(){
  }else if(g.pendingTile!==null){
   controls='<div class="domino-turn-hint"><b>Elige el extremo de la mesa</b><span>Ahora toca el extremo izquierdo o derecho que ya está colocado en la mesa.</span></div>';
  }else if(!dominoHasMove(g.player)){
-  controls='<div class="domino-turn-hint"><b>No tienes una jugada disponible</b><span>Elige pasar turno. Volverás a jugar cuando alguna ficha coincida.</span></div>'+
-   '<button type="button" class="domino-primary" data-domino-pass="true">Pasar turno</button>';
+  controls='<div class="domino-auto-pass" role="status" aria-live="polite"><span class="domino-auto-pass-icon">↪</span><span class="domino-auto-pass-copy"><b>¡Te pasaste!</b><small>No tienes una ficha válida. Pasando turno automáticamente…</small></span><i class="domino-auto-pass-glint"></i></div>';
  }else{
   controls='<div class="domino-turn-hint"><b>Te toca jugar</b><span>Selecciona una ficha que coincida con uno de los extremos de la mesa.</span></div>';
  }
@@ -3028,14 +3071,14 @@ function dominoOpenWithTile(tileId,actor){
  g.lastMove={id:tile.id,side:'open'};
  g.turn=actor==='player'?'ai':'player';
  g.statusText=actor==='player'?'Abriste con '+tile.a+'|'+tile.b+'. Ahora juega la IA.':'La IA abrió con '+tile.a+'|'+tile.b+'. Ahora te toca.';
- dominoRender();
- if(g.turn==='ai')scheduleDominoAi();
+ if(g.turn==='ai'){dominoRender();scheduleDominoAi()}else dominoScheduleAutoPass();
  return true;
 }
 function dominoFinish(result,reason='empty'){
  if(!dominoGame||dominoGame.status==='finished')return;
- const g=dominoGame;g.status='finished';
+ const g=dominoGame;g.status='finished';g.autoPassPending=false;
  if(dominoAiTimer){clearTimeout(dominoAiTimer);dominoAiTimer=null}
+ if(dominoPassTimer){clearTimeout(dominoPassTimer);dominoPassTimer=null}
  if(result==='win'){
   dominoStats.wins++;
   g.resultText=reason==='blocked'?'La partida se cerró. Tienes menos puntos en tus fichas que la IA.':'Te quedaste sin fichas antes que la IA.';
@@ -3067,8 +3110,7 @@ function dominoAfterMove(actor){
  g.pendingTile=null;
  g.turn=actor==='player'?'ai':'player';
  g.statusText=actor==='player'?'La IA está pensando.':'Tu turno. Busca una ficha que coincida con los extremos.';
- dominoRender();
- if(g.turn==='ai')scheduleDominoAi();
+ if(g.turn==='ai'){dominoRender();scheduleDominoAi()}else dominoScheduleAutoPass();
 }
 function dominoApplyTile(tileId,side,actor){
  const g=dominoGame;if(!g||g.status!=='playing'||(side!=='left'&&side!=='right'))return false;
@@ -3113,10 +3155,28 @@ function dominoSelectPlayerTile(tileId){
  }
  dominoApplyTile(tileId,canLeft?'left':'right','player');
 }
+function dominoScheduleAutoPass(){
+ const g=dominoGame;
+ if(!g||g.status!=='playing'||g.turn!=='player'||g.pendingTile!==null)return;
+ if(g.autoPassPending)return;
+ if(dominoHasMove(g.player)){dominoRender();return}
+ g.autoPassPending=true;
+ g.statusText='No tienes una ficha válida. El turno pasará automáticamente.';
+ dominoRender();
+ const gameId=g.id;
+ dominoPassTimer=setTimeout(()=>{
+  dominoPassTimer=null;
+  if(dominoGame!==g||g.id!==gameId||g.status!=='playing'||g.turn!=='player'||!g.autoPassPending)return;
+  g.autoPassPending=false;
+  dominoPassPlayer();
+ },1350);
+}
 function dominoPassPlayer(){
  const g=dominoGame;if(!g||g.turn!=='player'||g.status!=='playing'||dominoHasMove(g.player))return;
+ if(dominoPassTimer){clearTimeout(dominoPassTimer);dominoPassTimer=null}
+ g.autoPassPending=false;
  g.passCount++;
- g.pendingTile=null;g.turn='ai';g.statusText='Pasaste turno. La IA juega; volverás cuando sea tu turno.';
+ g.pendingTile=null;g.turn='ai';g.statusText='No tenías una ficha válida y pasaste turno. La IA juega ahora.';
  if(dominoCheckBlocked())return;
  dominoRender();scheduleDominoAi();
 }
@@ -3134,7 +3194,7 @@ function dominoAiTurn(){
  if(!dominoHasMove(g.ai)){
   g.passCount++;g.turn='player';g.statusText='La IA no puede jugar y pasó turno. Ahora te toca a ti.';
   if(dominoCheckBlocked())return;
-  dominoRender();return;
+  dominoScheduleAutoPass();return;
  }
  const choices=[];
  for(const t of g.ai){
@@ -3160,6 +3220,7 @@ function scheduleDominoAi(){
 }
 function startDominoGame(){
  if(dominoAiTimer){clearTimeout(dominoAiTimer);dominoAiTimer=null}
+ if(dominoPassTimer){clearTimeout(dominoPassTimer);dominoPassTimer=null}
  const deck=[];let id=0;
  for(let a=0;a<=6;a++)for(let b=a;b<=6;b++)deck.push({id:id++,a:a,b:b});
  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]]}
