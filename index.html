@@ -2739,8 +2739,13 @@ function addCityRoadNetwork3D(m){
   for(let x=a+.35;x<b-.25;x+=3.6)m.box(x,.058,rz-.018,Math.min(1.25,b-x),.012,.045,'#d9c991','#d9c991','#cbb982');
  for(const rx of CITY_ROADS)for(const [a,b] of roadIntervals(-edge+1,edge-1,CITY_ROADS,1.65))
   for(let z=a+.35;z<b-.25;z+=3.6)m.box(rx-.018,.058,z,.045,.012,Math.min(1.25,b-z),'#d9c991','#d9c991','#cbb982');
- // Calles rurales restauradas: conectan los poblados entre sí y con las avenidas centrales.
- // Se detienen en el borde del casco; no generan salidas independientes del mapa.
+ // Los caminos rurales siguen siendo de tierra y terminan dentro del terreno.
+ // Cada extremo tiene un pequeño ensanche de grava, como una zona de giro.
+ for(const r of OUTER_ROADS)for(const sign of [-1,1]){
+  const padX=sign>0?edge-2.25:-edge,padZ=sign>0?edge-2.25:-edge;
+  m.box(padX,.004,r-1.06,2.25,.028,2.12,'#a08d69','#8d7958','#756747');
+  m.box(r-1.06,.004,padZ,2.12,.028,2.25,'#a08d69','#8d7958','#756747');
+ }
  for(const r of OUTER_ROADS){
   m.box(-edge,.010,r-.46,edge*2,.040,.92,'#897958','#76664b','#65583f');
   m.box(r-.46,.010,-edge,.92,.040,edge*2,'#897958','#76664b','#65583f');
@@ -2749,14 +2754,32 @@ function addCityRoadNetwork3D(m){
    m.box(r+side*.59,.014,-edge,.12,.025,edge*2,'#b7a47a','#a18d67','#8c7958');
   }
  }
- // Solo dos avenidas principales prolongan los ejes centrales hasta los límites.
+ // Piedras bajas a ambos lados de cada final: rematan visualmente los caminos.
+ for(const r of OUTER_ROADS)for(const sign of [-1,1])for(const side of [-1,1]){
+  const x=sign*(edge-.32),z=r+side*.84;
+  m.sphere(x,.15,z,.22,.14,.21,'#777b68',5,2);
+  const vx=r+side*.84,vz=sign*(edge-.32);
+  m.sphere(vx,.14,vz,.21,.13,.20,'#85836d',5,2);
+ }
+ // Solo dos carreteras principales, asfaltadas, prolongan los ejes centrales
+ // desde la ciudad hasta el borde exterior del mapa.
  for(const r of MAIN_ROADS)for(const sign of [-1,1]){
   const a=sign>0?edge:-ruralEdge,len=ruralEdge-edge;
-  m.box(-.46,.010,a, .92,.040,len,'#897958','#76664b','#65583f');
-  m.box(a,.010,-.46,len,.040,.92,'#897958','#76664b','#65583f');
+  m.box(-roadHalf,.012,a,roadHalf*2,.045,len,roadTop,'#4b5552',roadFace);
+  m.box(a,.012,-roadHalf,len,.045,roadHalf*2,roadTop,'#4b5552',roadFace);
   for(const side of [-1,1]){
-   m.box(side*.59-.06,.014,a,.12,.025,len,'#b7a47a','#a18d67','#8c7958');
-   m.box(a,.014,side*.59-.06,len,.025,.12,'#b7a47a','#a18d67','#8c7958');
+   const sidePos=side>0?sideOffset-sideHalf:-sideOffset-sideHalf;
+   const curbPos=side*(roadHalf+.035)-.035;
+   m.box(sidePos,.018,a,sideHalf*2,.07,len,sideTop,'#b5a784',sideFace);
+   m.box(a,.018,sidePos,len,.07,sideHalf*2,sideTop,'#b5a784',sideFace);
+   m.box(curbPos,.057,a,.07,.045,len,curb,'#b7ae95','#938a75');
+   m.box(a,.057,curbPos,len,.045,.07,curb,'#b7ae95','#938a75');
+  }
+  // Línea central discontinua para que se lea como carretera pavimentada.
+  for(let d=.75;d<len-.4;d+=4.5){
+   const mark=sign>0?edge+d:-ruralEdge+d;
+   m.box(-.025,.058,mark,.05,.012,.90,'#e6d8a3','#e6d8a3','#d2c38f');
+   m.box(mark,.058,-.025,.90,.012,.05,'#e6d8a3','#e6d8a3','#d2c38f');
   }
  }
  // Pasos peatonales en los cuatro accesos a cada cruce, sin invadir el centro del cruce.
@@ -3054,8 +3077,13 @@ function draw2D(){if(!ctx)return;const s=worldScale(),viewFocusX=cameraFocusX(),
   }
  }
 
- // Red de caminos rurales restaurada, conectada con las calles urbanas.
- // Ninguno de estos ocho ramales llega al borde exterior del mapa.
+ // Ensanches de grava bajo los extremos de los caminos rurales.
+ for(const r of OUTER_ROADS)for(const sign of [-1,1]){
+  const padX=sign>0?CITY_EDGE-2.25:-CITY_EDGE,padZ=sign>0?CITY_EDGE-2.25:-CITY_EDGE;
+  groundPath([[padX,r-1.06],[padX+2.25,r-1.06],[padX+2.25,r+1.06],[padX,r+1.06]],'#a08d69','#786b50');
+  groundPath([[r-1.06,padZ],[r+1.06,padZ],[r+1.06,padZ+2.25],[r-1.06,padZ+2.25]],'#a08d69','#786b50');
+ }
+ // Caminos rurales de tierra: conectan los poblados, pero no salen del terreno.
  for(const r of OUTER_ROADS){
   groundPath([[-CITY_EDGE,r-.46],[CITY_EDGE,r-.46],[CITY_EDGE,r+.46],[-CITY_EDGE,r+.46]],'#897958','#65583f');
   groundPath([[r-.46,-CITY_EDGE],[r+.46,-CITY_EDGE],[r+.46,CITY_EDGE],[r-.46,CITY_EDGE]],'#897958','#65583f');
@@ -3064,17 +3092,37 @@ function draw2D(){if(!ctx)return;const s=worldScale(),viewFocusX=cameraFocusX(),
    groundPath([[r+side*.53,-CITY_EDGE],[r+side*.65,-CITY_EDGE],[r+side*.65,CITY_EDGE],[r+side*.53,CITY_EDGE]],'#b7a47a','#8c7958');
   }
  }
- // Solo los dos ejes centrales continúan desde el casco urbano hasta el final del mapa.
+ // Solo las dos carreteras principales continúan hasta el borde del mapa.
+ // Se dibujan con el mismo asfalto, aceras y bordillos que las calles urbanas.
  for(const r of MAIN_ROADS)for(const sign of [-1,1]){
-  const x0=sign>0?CITY_EDGE:-MAP_EDGE,x1=sign>0?MAP_EDGE:-CITY_EDGE;
-  const z0=sign>0?CITY_EDGE:-MAP_EDGE,z1=sign>0?MAP_EDGE:-CITY_EDGE;
-  groundPath([[-.46,z0],[.46,z0],[.46,z1],[-.46,z1]],'#897958','#65583f');
-  groundPath([[x0,-.46],[x1,-.46],[x1,.46],[x0,.46]],'#897958','#65583f');
+  const a=sign>0?CITY_EDGE:-MAP_EDGE,len=MAP_EDGE-CITY_EDGE;
+  groundPath([[-.78,a],[.78,a],[.78,a+len],[-.78,a+len]],'#515c59','#394640');
+  groundPath([[a,-.78],[a+len,-.78],[a+len,.78],[a,.78]],'#515c59','#394640');
   for(const side of [-1,1]){
-   groundPath([[side*.53,z0],[side*.65,z0],[side*.65,z1],[side*.53,z1]],'#b7a47a','#8c7958');
-   groundPath([[x0,side*.53],[x1,side*.53],[x1,side*.65],[x0,side*.65]],'#b7a47a','#8c7958');
+   const sidePos=side>0?.81:-1.23,curbPos=side*(.78+.035)-.035;
+   groundPath([[sidePos,a],[sidePos+.42,a],[sidePos+.42,a+len],[sidePos,a+len]],'#c7b995','#998b6e');
+   groundPath([[a,sidePos],[a+len,sidePos],[a+len,sidePos+.42],[a,sidePos+.42]],'#c7b995','#998b6e');
+   groundPath([[curbPos,a],[curbPos+.07,a],[curbPos+.07,a+len],[curbPos,a+len]],'#d8cfb3','#938a75');
+   groundPath([[a,curbPos],[a+len,curbPos],[a+len,curbPos+.07],[a,curbPos+.07]],'#d8cfb3','#938a75');
+  }
+  for(let d=.75;d<len-.4;d+=4.5){
+   const mark=sign>0?CITY_EDGE+d:-MAP_EDGE+d;
+   groundPath([[-.025,mark],[.025,mark],[.025,mark+.90],[-.025,mark+.90]],'#e6d8a3','#d2c38f');
+   groundPath([[mark,-.025],[mark+.90,-.025],[mark+.90,.025],[mark,.025]],'#e6d8a3','#d2c38f');
   }
  }
+ // Piedras decorativas junto a los ensanches: el final del camino queda rematado.
+ ctx.save();
+ for(const r of OUTER_ROADS)for(const sign of [-1,1])for(const side of [-1,1]){
+  const stones=[[sign*(CITY_EDGE-.32),r+side*.84],[r+side*.84,sign*(CITY_EDGE-.32)]];
+  for(let i=0;i<stones.length;i++){
+   const p=iso(stones[i][0],stones[i][1]),rx=(i===0?6:5.5)*s,ry=(i===0?3.8:3.5)*s;
+   ctx.fillStyle=i===0?'#777b68':'#85836d';ctx.beginPath();ctx.ellipse(p[0],p[1],rx,ry,0,0,Math.PI*2);ctx.fill();
+   ctx.strokeStyle='#59624f';ctx.lineWidth=Math.max(1,1.2*s);ctx.stroke();
+   ctx.fillStyle='#a4a28a';ctx.beginPath();ctx.ellipse(p[0]-rx*.22,p[1]-ry*.28,rx*.28,ry*.22,0,0,Math.PI*2);ctx.fill();
+  }
+ }
+ ctx.restore();
  // House patios are driven by the exact same footprint used by collision checks.
  for(const o of sceneObjects())if(o.type==='house'||o.type==='shop')drawPavedPad(o.x-.06,o.y-.06,o.w+.12,o.d+.12,'#b8aa8a');
  if(zone==='parque'){
