@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b27">
 <meta name="description" content="SIM Cuba: simulador de vida 3D low-poly ambientado en Cuba, con creador visual de personajes y ciudad explorable.">
-<title>SIM Cuba — Comercios, empleo y dominó 0.58</title>
+<title>SIM Cuba — Comercios, empleo y dominó 0.59</title>
 <style>
 :root{color-scheme:dark;--cream:#f2e8cc;--muted:#b6c6b7;--green:#a7cf8a;--gold:#e6c779;--line:#ffffff30}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172b27;color:var(--cream);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:#29413a;border-radius:10px;padding:10px 13px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -721,7 +721,7 @@
 }
 
 
-/* SIM Cuba 0.58 — interfaces por negocio, turno temporizado y dominó contra IA */
+/* SIM Cuba 0.59 — interfaces por negocio, turno temporizado y dominó contra IA */
 .game-panel:not(.phone-mode){width:min(460px,calc(100vw - 28px));padding:15px}
 .game-action-list{gap:7px;margin-top:12px}
 .game-action{min-height:57px;padding:8px 9px;gap:8px}
@@ -742,7 +742,7 @@
 }
 
 
-/* SIM Cuba 0.58 — interfaces específicas de negocios, jornada y dominó */
+/* SIM Cuba 0.59 — interfaces específicas de negocios, jornada y dominó */
 .game-panel.business-mode,.game-panel.work-mode,.game-panel.domino-mode{width:min(590px,100%);max-height:min(88dvh,780px)}
 .game-panel.business-mode #gameActionList,.game-panel.work-mode #gameActionList,.game-panel.domino-mode #gameActionList{display:block;margin-top:12px}
 .business-interface{display:flex;flex-direction:column;gap:11px}
@@ -811,7 +811,7 @@
 }
 
 
-/* SIM Cuba 0.58 — mesa de dominó con cadena serpenteante, fichas con puntos y movimiento */
+/* SIM Cuba 0.59 — mesa de dominó con cadena serpenteante, fichas con puntos y movimiento */
 .game-panel.domino-mode{width:min(790px,calc(100vw - 30px));max-height:min(94dvh,920px);padding:17px}
 .game-panel.domino-mode #gameActionList{display:block;margin-top:12px;max-height:calc(94dvh - 150px);overflow:auto;scrollbar-width:thin}
 .domino-interface{display:flex;flex-direction:column;gap:12px}
@@ -907,6 +907,54 @@
 }
 @media(prefers-reduced-motion:reduce){
  .domino-mode *,.domino-mode *:before,.domino-mode *:after{animation:none!important;transition:none!important}
+}
+
+
+/* SIM Cuba 0.59 — dominó centrado, pases y fichas más legibles */
+.game-panel.domino-mode{width:min(860px,calc(100vw - 22px));}
+.domino-table-felt{min-height:390px;}
+.domino-board-scroll{max-height:330px;min-height:180px;overflow:auto;padding:10px 4px;}
+.domino-chain{display:block;min-height:160px;padding:5px 0;}
+.domino-board-center{display:grid;grid-template-columns:minmax(0,1fr) 62px minmax(0,1fr);align-items:center;gap:6px;width:100%;min-height:160px;}
+.domino-arm{display:flex;min-width:0;flex-direction:column;justify-content:center;gap:9px;}
+.domino-chain-row{display:flex;align-items:center;justify-content:flex-start;gap:4px;min-height:40px;}
+.domino-chain-row.is-reversed{flex-direction:row-reverse;}
+.domino-chain-piece{width:clamp(35px,calc((100% - 12px)/4),54px);height:39px;border:2px solid #b9aa85;border-radius:6px;background:linear-gradient(145deg,#fffdf3 0%,#e9dfc7 72%,#d6c9aa 100%);box-shadow:0 3px 7px #00140dcc,inset 0 1px 2px #fff;}
+.domino-board-origin{display:flex;min-width:0;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
+.domino-board-origin small{font-size:7px;font-weight:950;letter-spacing:1.4px;color:#f1d994;text-shadow:0 1px 3px #000;}
+.domino-board-origin .domino-chain-piece{width:58px;height:42px;box-shadow:0 0 0 2px #e7d18a55,0 4px 9px #0009;}
+.domino-arm-empty{display:flex;min-height:34px;align-items:center;justify-content:center;color:#d7c58c99;font-size:16px;font-weight:900;}
+.domino-row-turn{height:5px;line-height:5px;text-align:center;color:#e4cf8b99;font-size:12px;font-weight:900;}
+.domino-pip-grid i{width:5px;height:5px;border-radius:50%;background:transparent;}
+.domino-pip-grid i.is-dot{background:#17231b;box-shadow:0 0 1px #000,0 1px 1px #fff9;}
+.domino-half{padding:2px;}
+.domino-divider{width:2px;background:#857b65;box-shadow:1px 0 #ffffffaa;}
+.domino-hand{max-height:220px;overflow:auto;align-content:flex-start;padding:8px 4px;}
+.domino-hand-tile{width:65px;height:47px;border:2px solid #c9bb98;border-radius:7px;background:linear-gradient(145deg,#fffef6,#e6dcc2);box-shadow:0 3px 6px #0008;}
+.domino-hand-tile .domino-pip-grid i{width:5.2px;height:5.2px;}
+.domino-hand-tile:disabled{opacity:.55;filter:grayscale(.22);}
+.domino-hand-tile.is-playable{border-color:#f4dc91;box-shadow:0 2px 8px #0008,0 0 0 2px #f4dc914d;}
+.domino-ai-hand-back{gap:0;}
+.domino-back-card{width:25px;height:37px;}
+.domino-pass-counter{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:65px;}
+.domino-pass-counter small{color:#e0ce98!important;}
+.domino-pass-counter b{font-size:12px!important;color:#f7e4a4!important;}
+@media(max-width:620px){
+ .game-panel.domino-mode{width:calc(100vw - 10px);padding:10px;}
+ .game-panel.domino-mode #gameActionList{max-height:calc(96dvh - 126px);}
+ .domino-table-felt{min-height:340px;padding:9px;gap:9px;}
+ .domino-board-scroll{max-height:285px;min-height:145px;padding:8px 1px;}
+ .domino-board-center{grid-template-columns:minmax(0,1fr) 51px minmax(0,1fr);gap:3px;min-height:130px;}
+ .domino-arm{gap:7px;}
+ .domino-chain-row{gap:3px;min-height:36px;}
+ .domino-chain-piece{width:calc((100% - 3px)/2);max-width:55px;height:35px;}
+ .domino-board-origin .domino-chain-piece{width:48px;height:37px;}
+ .domino-pip-grid i{width:4.1px;height:4.1px;}
+ .domino-hand{max-height:205px;gap:5px;}
+ .domino-hand-tile{width:58px;height:43px;}
+ .domino-hand-tile .domino-pip-grid i{width:4.6px;height:4.6px;}
+ .domino-score-stat{font-size:7px;}
+ .domino-turn-badge{font-size:8px;}
 }
 
 </style>
@@ -1099,7 +1147,7 @@
     <button class="randomize-btn" id="randomizeBtn" type="button">⤨ Sorpréndeme · Aleatorio</button>
    </aside>
   </div>
-  <footer class="creator-footer"><span>SIM CUBA <b>0.58</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
+  <footer class="creator-footer"><span>SIM CUBA <b>0.59</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
  </div>
 </div>
 <script>
@@ -2651,6 +2699,22 @@ function dominoPipsMarkup(value){
 function dominoFaceMarkup(tile){
  return '<span class="domino-half">'+dominoPipsMarkup(tile.a)+'</span><span class="domino-divider"></span><span class="domino-half">'+dominoPipsMarkup(tile.b)+'</span>';
 }
+function dominoArmMarkup(tiles,side){
+ if(!tiles.length)return '<div class="domino-arm-empty">'+(side==='left'?'←':'→')+'</div>';
+ const columns=window.innerWidth<=620?2:4;
+ let html='';
+ for(let i=0,row=0;i<tiles.length;i+=columns,row++){
+  const part=tiles.slice(i,i+columns);
+  const reversed=side==='left'?row%2===0:row%2===1;
+  const markup=part.map(t=>{
+   const fresh=dominoGame.lastMove&&dominoGame.lastMove.id===t.id?' is-new':'';
+   return '<div class="domino-piece domino-chain-piece'+fresh+'" aria-label="Ficha '+t.a+' y '+t.b+'">'+dominoFaceMarkup(t)+'</div>';
+  }).join('');
+  html+='<div class="domino-chain-row'+(reversed?' is-reversed':'')+'">'+markup+'</div>';
+  if(i+columns<tiles.length)html+='<div class="domino-row-turn">'+(side==='left'?'↶':'↷')+'</div>';
+ }
+ return html;
+}
 function dominoRender(){
  if(!dominoGame)return;
  const g=dominoGame,panel=$('gamePanel'),modal=$('gameModal'),list=$('gameActionList');
@@ -2660,28 +2724,24 @@ function dominoRender(){
  panel.classList.add('domino-mode');
  $('gamePanelKicker').textContent='DOMINÓ DOBLE SEIS · CONTRA LA IA';
  $('gamePanelTitle').textContent=g.status==='finished'?'Resultado de la partida':'Mesa de dominó';
- $('gamePanelDescription').textContent=g.statusText||'Empareja los extremos de la cadena para colocar tus fichas.';
+ $('gamePanelDescription').textContent=g.statusText||'Coloca una ficha que coincida con alguno de los extremos. Si no tienes jugada, pasa turno.';
  $('gamePanelFootLeft').textContent='Victorias '+dominoStats.wins+' · Derrotas '+dominoStats.losses+' · Empates '+dominoStats.draws;
  list.className='game-action-list';
- const columns=window.innerWidth<=620?5:8;
- const rows=[];
- for(let start=0,rowIndex=0;start<g.board.length;start+=columns,rowIndex++){
-  const chunk=g.board.slice(start,start+columns),reversed=rowIndex%2===1;
-  const ordered=reversed?chunk.slice().reverse():chunk;
-  const tiles=ordered.map(t=>{
-   const fresh=g.lastMove&&g.lastMove.id===t.id?' is-new':'';
-   return '<div class="domino-piece domino-chain-piece'+fresh+'" aria-label="Ficha '+t.a+' y '+t.b+'">'+dominoFaceMarkup(t)+'</div>';
-  }).join('');
-  rows.push('<div class="domino-chain-row'+(reversed?' is-reversed':'')+'">'+tiles+'</div>');
-  if(start+columns<g.board.length)rows.push('<div class="domino-chain-turn '+(reversed?'from-left':'from-right')+'">'+(reversed?'↘':'↙')+'</div>');
- }
- const chain=rows.join('')||'<div class="domino-empty">La mesa está esperando la primera ficha.</div>';
- const aiBacks=Array.from({length:Math.min(5,g.ai.length)},(_,i)=>'<span class="domino-back-card" style="--card-index:'+i+'"></span>').join('');
+ const originIndex=Math.max(0,g.board.findIndex(t=>t.id===g.openingTileId));
+ const origin=g.board[originIndex];
+ const leftTiles=g.board.slice(0,originIndex).reverse();
+ const rightTiles=g.board.slice(originIndex+1);
+ const originMarkup=origin?'<div class="domino-board-origin"><small>INICIO</small><div class="domino-piece domino-chain-piece">'+dominoFaceMarkup(origin)+'</div></div>':'<div class="domino-board-origin"></div>';
+ const chain='<div class="domino-board-center">'+
+  '<div class="domino-arm domino-arm-left">'+dominoArmMarkup(leftTiles,'left')+'</div>'+
+  originMarkup+
+  '<div class="domino-arm domino-arm-right">'+dominoArmMarkup(rightTiles,'right')+'</div>'+
+ '</div>';
+ const aiBacks=Array.from({length:Math.min(6,g.ai.length)},(_,i)=>'<span class="domino-back-card" style="--card-index:'+i+'"></span>').join('');
  const playerTiles=g.player.map(t=>{
   const playable=dominoTileCanPlay(t),disabled=g.status!=='playing'||g.turn!=='player'||!playable||g.pendingTile!==null;
   const selected=g.pendingTile===t.id?' is-selected':'';
-  const drawn=g.lastDrawTileId===t.id?' is-drawn':'';
-  return '<button type="button" class="domino-piece domino-hand-tile'+selected+drawn+(playable?' is-playable':'')+'" data-domino-tile="'+t.id+'" aria-label="Ficha '+t.a+' y '+t.b+'" '+(disabled?'disabled':'')+'>'+dominoFaceMarkup(t)+'</button>';
+  return '<button type="button" class="domino-piece domino-hand-tile'+selected+(playable?' is-playable':'')+'" data-domino-tile="'+t.id+'" aria-label="Ficha '+t.a+' y '+t.b+'" '+(disabled?'disabled':'')+'>'+dominoFaceMarkup(t)+'</button>';
  }).join('');
  let controls='';
  if(g.status==='finished'){
@@ -2695,41 +2755,43 @@ function dominoRender(){
    '<button type="button" data-domino-side="right">Derecha · '+g.rightEnd+' →</button>'+
    '<button type="button" data-domino-cancel-choice="true">Cancelar selección</button></div>';
  }else if(!dominoHasMove(g.player)){
-  controls=g.stock.length
-   ?'<button type="button" class="domino-primary" data-domino-draw="true">Robar ficha del pozo · '+g.stock.length+' restantes</button>'
-   :'<button type="button" class="domino-primary" data-domino-pass="true">Pasar turno</button>';
+  controls='<div class="domino-turn-hint"><b>No tienes una jugada disponible</b><span>Elige pasar turno. Volverás a jugar cuando alguna ficha coincida.</span></div>'+
+   '<button type="button" class="domino-primary" data-domino-pass="true">Pasar turno</button>';
  }else{
-  controls='<div class="domino-turn-hint"><b>Te toca jugar</b><span>Selecciona una ficha iluminada y colócala en un extremo.</span></div>';
+  controls='<div class="domino-turn-hint"><b>Te toca jugar</b><span>Selecciona una ficha iluminada y colócala a la izquierda o a la derecha.</span></div>';
  }
  const turnLabel=g.status==='finished'?'PARTIDA TERMINADA':g.turn==='ai'?'TURNO DE LA IA':'TU TURNO';
  list.innerHTML='<div class="domino-interface">'+
-  '<div class="domino-scorebar"><span class="domino-turn-badge '+(g.turn==='ai'?'is-ai':g.status==='finished'?'is-finished':'is-player')+'">'+turnLabel+'</span><span class="domino-score-stat">POZO <b>'+g.stock.length+'</b></span><span class="domino-score-stat">FICHAS EN MESA <b>'+g.board.length+'</b></span></div>'+
+  '<div class="domino-scorebar"><span class="domino-turn-badge '+(g.turn==='ai'?'is-ai':g.status==='finished'?'is-finished':'is-player')+'">'+turnLabel+'</span><span class="domino-score-stat">PASES SEGUIDOS <b>'+g.passCount+'/2</b></span><span class="domino-score-stat">FICHAS EN MESA <b>'+g.board.length+'</b></span></div>'+
   '<div class="domino-table-shell"><div class="domino-table-felt">'+
-   '<div class="domino-table-caption"><span>✦ MESA DE DOMINÓ</span><span>DOBLE SEIS</span></div>'+
-   '<div class="domino-seat domino-seat-ai'+(g.turn==='ai'?' is-active':'')+'"><div class="domino-seat-avatar">🤖</div><div class="domino-seat-copy"><b>RIVAL · IA</b><small>'+(g.turn==='ai'?'Está pensando…':'Esperando su turno')+'</small></div><div class="domino-ai-hand-back">'+aiBacks+'<b>'+g.ai.length+'</b></div></div>'+
+   '<div class="domino-table-caption"><span>✦ MESA DE DOMINÓ</span><span>INICIO EN EL CENTRO · DOBLE SEIS</span></div>'+
+   '<div class="domino-seat domino-seat-ai'+(g.turn==='ai'?' is-active':'')+'"><div class="domino-seat-avatar">🤖</div><div class="domino-seat-copy"><b>RIVAL · IA</b><small>'+(g.turn==='ai'?'Está pensando…':'Esperando su turno')+'</small></div><div class="domino-ai-hand-back">'+aiBacks+'<b>'+g.ai.length+' fichas</b></div></div>'+
    '<div class="domino-board-scroll"><div class="domino-chain">'+chain+'</div></div>'+
-   '<div class="domino-board-ends"><span><small>EXTREMO IZQUIERDO</small><b>'+g.leftEnd+'</b></span><span class="domino-stock-pile"><i></i><i></i><b>'+g.stock.length+'</b><small>POZO</small></span><span><small>EXTREMO DERECHO</small><b>'+g.rightEnd+'</b></span></div>'+
+   '<div class="domino-board-ends"><span><small>EXTREMO IZQUIERDO</small><b>'+g.leftEnd+'</b></span><span class="domino-pass-counter"><small>PASES SEGUIDOS</small><b>'+g.passCount+' / 2</b></span><span><small>EXTREMO DERECHO</small><b>'+g.rightEnd+'</b></span></div>'+
    '<div class="domino-seat domino-seat-player'+(g.turn==='player'&&g.status==='playing'?' is-active':'')+'"><div class="domino-seat-avatar">🧑</div><div class="domino-seat-copy"><b>TÚ</b><small>'+(g.turn==='player'?'Tu turno':'En la mesa')+'</small></div><div class="domino-player-count">'+g.player.length+' fichas</div></div>'+
   '</div></div>'+
-  '<div class="domino-hand-panel"><div class="domino-hand-head"><b>TUS FICHAS</b><span>'+g.player.length+' / 7</span></div><div class="domino-hand">'+(playerTiles||'<span class="domino-empty">No te quedan fichas.</span>')+'</div></div>'+
+  '<div class="domino-hand-panel"><div class="domino-hand-head"><b>TUS FICHAS</b><span>'+g.player.length+' fichas</span></div><div class="domino-hand">'+(playerTiles||'<span class="domino-empty">No te quedan fichas.</span>')+'</div></div>'+
   controls+'</div>';
  modal.classList.remove('hidden');
  const boardScroll=list.querySelector('.domino-board-scroll');
  if(boardScroll&&g.lastMove)boardScroll.scrollTop=g.lastMove.side==='left'?0:boardScroll.scrollHeight;
- g.lastMove=null;g.lastDrawTileId=null;
+ g.lastMove=null;
 }
-function dominoFinish(result){
+function dominoFinish(result,reason='empty'){
  if(!dominoGame||dominoGame.status==='finished')return;
  const g=dominoGame;g.status='finished';
  if(dominoAiTimer){clearTimeout(dominoAiTimer);dominoAiTimer=null}
  if(result==='win'){
-  dominoStats.wins++;g.resultText='Te quedaste sin fichas o terminaste con menos puntos que la IA.';
+  dominoStats.wins++;
+  g.resultText=reason==='blocked'?'La partida se cerró. Tienes menos puntos en tus fichas que la IA.':'Te quedaste sin fichas antes que la IA.';
   changeNeeds({fun:25,social:18,energy:-6});
  }else if(result==='loss'){
-  dominoStats.losses++;g.resultText='La IA terminó primero o cerró la partida con menos puntos.';
+  dominoStats.losses++;
+  g.resultText=reason==='blocked'?'La partida se cerró. La IA tiene menos puntos en sus fichas.':'La IA terminó sus fichas antes que tú.';
   changeNeeds({fun:12,social:8,energy:-6});
  }else{
-  dominoStats.draws++;g.resultText='Los dos jugadores terminaron con la misma cantidad de puntos.';
+  dominoStats.draws++;
+  g.resultText='La partida se cerró y ambos jugadores terminaron con la misma cantidad de puntos.';
   changeNeeds({fun:18,social:12,energy:-4});
  }
  g.result=result;
@@ -2737,24 +2799,21 @@ function dominoFinish(result){
  saveGame();dominoRender();
 }
 function dominoCheckBlocked(){
- if(!dominoGame||dominoGame.stock.length>0)return false;
- if(!dominoHasMove(dominoGame.player)&&!dominoHasMove(dominoGame.ai)){
-  const playerPoints=dominoPips(dominoGame.player),aiPoints=dominoPips(dominoGame.ai);
-  dominoFinish(playerPoints<aiPoints?'win':playerPoints>aiPoints?'loss':'draw');
-  return true;
- }
- return false;
+ if(!dominoGame||dominoGame.passCount<2)return false;
+ const playerPoints=dominoPips(dominoGame.player),aiPoints=dominoPips(dominoGame.ai);
+ dominoFinish(playerPoints<aiPoints?'win':playerPoints>aiPoints?'loss':'draw','blocked');
+ return true;
 }
 function dominoAfterMove(actor){
  if(!dominoGame||dominoGame.status!=='playing')return;
- const hand=actor==='player'?dominoGame.player:dominoGame.ai;
+ const g=dominoGame,hand=actor==='player'?g.player:g.ai;
+ g.passCount=0;
  if(hand.length===0){dominoFinish(actor==='player'?'win':'loss');return}
- if(dominoCheckBlocked())return;
- dominoGame.pendingTile=null;
- dominoGame.turn=actor==='player'?'ai':'player';
- dominoGame.statusText=actor==='player'?'La IA está pensando.':'Tu turno. Busca una ficha que coincida con los extremos.';
+ g.pendingTile=null;
+ g.turn=actor==='player'?'ai':'player';
+ g.statusText=actor==='player'?'La IA está pensando.':'Tu turno. Busca una ficha que coincida con los extremos.';
  dominoRender();
- if(dominoGame.turn==='ai')scheduleDominoAi();
+ if(g.turn==='ai')scheduleDominoAi();
 }
 function dominoApplyTile(tileId,side,actor){
  const g=dominoGame;if(!g||g.status!=='playing')return false;
@@ -2784,27 +2843,17 @@ function dominoSelectPlayerTile(tileId){
  if(sides.length===2){g.pendingTile=tileId;dominoRender();return}
  dominoApplyTile(tileId,sides[0],'player');
 }
-function dominoDrawPlayerTile(){
- const g=dominoGame;if(!g||g.turn!=='player'||dominoHasMove(g.player)||g.stock.length===0)return;
- const tile=g.stock.pop();g.player.push(tile);g.lastDrawTileId=tile.id;
- if(dominoTileCanPlay(tile))g.statusText='Robaste una ficha que puedes jugar. Selecciónala.';
- else g.statusText='La ficha no coincide. Puedes robar otra si queda alguna.';
- if(g.stock.length===0&&!dominoHasMove(g.player)){
-  if(dominoCheckBlocked())return;
- }
- dominoRender();saveGame();
-}
 function dominoPassPlayer(){
- const g=dominoGame;if(!g||g.turn!=='player'||g.stock.length>0||dominoHasMove(g.player))return;
- g.statusText='Pasaste. La IA juega ahora.';g.turn='ai';
+ const g=dominoGame;if(!g||g.turn!=='player'||g.status!=='playing'||dominoHasMove(g.player))return;
+ g.passCount++;
+ g.pendingTile=null;g.turn='ai';g.statusText='Pasaste turno. La IA juega; volverás cuando sea tu turno.';
  if(dominoCheckBlocked())return;
  dominoRender();scheduleDominoAi();
 }
 function dominoAiTurn(){
  const g=dominoGame;if(!g||g.status!=='playing'||g.turn!=='ai')return;
- while(!dominoHasMove(g.ai)&&g.stock.length>0)g.ai.push(g.stock.pop());
  if(!dominoHasMove(g.ai)){
-  g.turn='player';g.statusText='La IA pasó. Es tu turno.';
+  g.passCount++;g.turn='player';g.statusText='La IA no puede jugar y pasó turno. Ahora te toca a ti.';
   if(dominoCheckBlocked())return;
   dominoRender();return;
  }
@@ -2830,7 +2879,7 @@ function startDominoGame(){
  const deck=[];let id=0;
  for(let a=0;a<=6;a++)for(let b=a;b<=6;b++)deck.push({id:id++,a:a,b:b});
  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]]}
- const playerHand=deck.slice(0,7),aiHand=deck.slice(7,14),stock=deck.slice(14);
+ const playerHand=deck.slice(0,14),aiHand=deck.slice(14,28);
  const all=playerHand.map(t=>({tile:t,owner:'player'})).concat(aiHand.map(t=>({tile:t,owner:'ai'})));
  const doubles=all.filter(x=>x.tile.a===x.tile.b);
  const candidates=doubles.length?doubles:all;
@@ -2840,9 +2889,9 @@ function startDominoGame(){
  hand.splice(hand.findIndex(t=>t.id===opener.tile.id),1);
  dominoGame={
   id:++dominoGameSerial,status:'playing',statusText:'Se abre con la ficha '+opener.tile.a+'|'+opener.tile.b+'.',
-  player:playerHand,ai:aiHand,stock:stock,board:[{id:opener.tile.id,a:opener.tile.a,b:opener.tile.b}],
-  leftEnd:opener.tile.a,rightEnd:opener.tile.b,
-  turn:opener.owner==='player'?'ai':'player',pendingTile:null,result:null,resultText:''
+  player:playerHand,ai:aiHand,board:[{id:opener.tile.id,a:opener.tile.a,b:opener.tile.b}],
+  openingTileId:opener.tile.id,leftEnd:opener.tile.a,rightEnd:opener.tile.b,
+  turn:opener.owner==='player'?'ai':'player',pendingTile:null,passCount:0,result:null,resultText:''
  };
  dominoRender();
  if(dominoGame.turn==='ai')scheduleDominoAi();
@@ -2998,7 +3047,6 @@ $('gameActionList').addEventListener('click',e=>{
  const dominoTile=e.target.closest('[data-domino-tile]');if(dominoTile){dominoSelectPlayerTile(Number(dominoTile.dataset.dominoTile));return}
  const dominoSide=e.target.closest('[data-domino-side]');if(dominoSide){if(dominoGame&&dominoGame.pendingTile!==null)dominoApplyTile(dominoGame.pendingTile,dominoSide.dataset.dominoSide,'player');return}
  if(e.target.closest('[data-domino-cancel-choice]')){if(dominoGame){dominoGame.pendingTile=null;dominoRender()}return}
- if(e.target.closest('[data-domino-draw]')){dominoDrawPlayerTile();return}
  if(e.target.closest('[data-domino-pass]')){dominoPassPlayer();return}
  const group=e.target.closest('[data-action-group]');if(group){openInteractionGroup(group.dataset.actionGroup);return}
  const a=e.target.closest('[data-game-action]');if(a){performGameAction(a.dataset.gameAction);return}
