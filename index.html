@@ -1812,11 +1812,12 @@ const dominoConfig={players:2,handSize:7,teamMode:false};
 const SAVE_KEY='simcuba.save.v021'; // Mantiene compatibilidad con partidas anteriores
 const AUTO_START_KEY='simcuba.autostart.v1';
 const MOVE_SPEED=2.8; // unidades del mundo por segundo; velocidad continua independiente del zoom
-const NAV={minX:-71.1,minY:-71.1,step:.18,nx:791,ny:791}; // 142.2 × 142.2 unidades: unas 10 veces el área del casco urbano original.
+const NAV={minX:-100,minY:-100,step:.2,nx:1001,ny:1001}; // 200 × 200 unidades con una resolución de navegación de 20 cm.
 const CITY_ROADS=[-20,-10,0,10,20];
 const OUTER_ROADS=[-60,-40,40,60];
 const MAP_ROADS=[...CITY_ROADS,...OUTER_ROADS];
 const CITY_EDGE=70.5;
+const MAP_EDGE=100;
 const $=id=>document.getElementById(id);
 const CREATOR_SKIN={ '🏻':'#f0c9a6','🏼':'#dfae87','🏽':'#bd8965','🏾':'#8d5a3e','🏿':'#603b2b' };
 const ACCESSORY_NAMES={glasses:'Gafas',cap:'Gorra',backpack:'Mochila',chain:'Cadena',watch:'Reloj',earrings:'Pendientes',bracelet:'Pulsera',bandana:'Pañuelo'};
@@ -2103,7 +2104,7 @@ function buildCityObjects(){
  // Elementos propios de una ciudad cubana: mesas de dominó en plazas, papeleras,
  // jardineras y postes eléctricos en aceras, nunca en mitad de la calzada.
  const canPlaceProp=(x,z,r,clear=.18)=>{
-  if(Math.abs(x)>CITY_EDGE-1||Math.abs(z)>CITY_EDGE-1)return false;
+  if(Math.abs(x)>MAP_EDGE-1||Math.abs(z)>MAP_EDGE-1)return false;
   if(MAP_ROADS.some(v=>Math.abs(x-v)<1.34||Math.abs(z-v)<1.34))return false;
   for(const q of out){if(!q.block)continue;const b=q.block;
    if(b.type==='rect'){const dx=Math.max(b.x-x,0,x-(b.x+b.w)),dz=Math.max(b.y-z,0,z-(b.y+b.d));if(dx*dx+dz*dz<(r+clear)*(r+clear))return false}
@@ -2210,7 +2211,9 @@ function buildCityObjects(){
  const groves=[
   {x:-50,z:-20,r:5},{x:48,z:-22,r:5},{x:-50,z:23,r:5},{x:50,z:24,r:5},
   {x:-25,z:-52,r:4.5},{x:27,z:-52,r:4.5},{x:-26,z:52,r:4.5},{x:27,z:52,r:4.5},
-  {x:-57,z:3,r:4},{x:57,z:-2,r:4}
+  {x:-57,z:3,r:4},{x:57,z:-2,r:4},
+  // Cuatro bosques de borde para que las nuevas esquinas no queden vacías.
+  {x:-82,z:-82,r:5},{x:82,z:-82,r:5},{x:-82,z:82,r:5},{x:82,z:82,r:5}
  ];
  groves.forEach((g,gi)=>{
   let planted=0,attempt=0;
@@ -2242,10 +2245,12 @@ function buildCityObjects(){
  add('pond',-28,59,{rx:1.35,rz:1.0},{type:'circle',x:-28,y:59,r:1.55});
 
  // Palmeras, árboles frutales y árboles de sombra por las afueras.
+ // Se conserva el presupuesto total de objetos y se distribuye en los 200 × 200.
+ const scatterEdge=MAP_EDGE-2;
  let outerTreeCount=0;
  const outerTreeVariants=[2,0,1,2,2,0,1,2,0];
- for(let i=0;i<14000&&outerTreeCount<360;i++){
-  const x=-68+rng()*136,z=-68+rng()*136;
+ for(let i=0;i<14000&&outerTreeCount<300;i++){
+  const x=-scatterEdge+rng()*scatterEdge*2,z=-scatterEdge+rng()*scatterEdge*2;
   if(Math.abs(x)<24&&Math.abs(z)<24)continue;
   if(canPlaceProp(x,z,.40,.60)){
    const variant=outerTreeVariants[Math.floor(rng()*outerTreeVariants.length)];
@@ -2255,8 +2260,8 @@ function buildCityObjects(){
  }
  // Matorrales y plantas tropicales en patios, cunetas y claros.
  let outerPlantCount=0;
- for(let i=0;i<10000&&outerPlantCount<280;i++){
-  const x=-68+rng()*136,z=-68+rng()*136;
+ for(let i=0;i<10000&&outerPlantCount<236;i++){
+  const x=-scatterEdge+rng()*scatterEdge*2,z=-scatterEdge+rng()*scatterEdge*2;
   if(Math.abs(x)<23&&Math.abs(z)<23)continue;
   if(canPlaceProp(x,z,.18,.22)){
    add('plant',x,z,{variant:Math.floor(rng()*4)},{type:'circle',x,y:z,r:.18});
@@ -2266,7 +2271,7 @@ function buildCityObjects(){
  // Piedras bajas para romper la repetición del césped.
  let outerRockCount=0;
  for(let i=0;i<7000&&outerRockCount<68;i++){
-  const x=-68+rng()*136,z=-68+rng()*136;
+  const x=-scatterEdge+rng()*scatterEdge*2,z=-scatterEdge+rng()*scatterEdge*2;
   if(Math.abs(x)<24&&Math.abs(z)<24)continue;
   if(canPlaceProp(x,z,.20,.24)){
    const scale=.75+rng()*.65;
@@ -2691,7 +2696,7 @@ function roadIntervals(start,end,cuts,half){
  if(cursor<end-.001)out.push([cursor,end]);return out;
 }
 function addCityRoadNetwork3D(m){
- const edge=CITY_EDGE,roadHalf=.78,sideOffset=1.02,sideHalf=.21;
+ const edge=CITY_EDGE,ruralEdge=MAP_EDGE,roadHalf=.78,sideOffset=1.02,sideHalf=.21;
  const roadTop='#515c59',roadFace='#414b48',sideTop='#c7b995',sideFace='#998b6e',curb='#d8cfb3';
  // Calzadas: cada tramo termina antes del cruce; cada intersección se dibuja una sola vez.
  for(const rz of CITY_ROADS){
@@ -2733,11 +2738,11 @@ function addCityRoadNetwork3D(m){
   for(let z=a+.35;z<b-.25;z+=3.6)m.box(rx-.018,.058,z,.045,.012,Math.min(1.25,b-z),'#d9c991','#d9c991','#cbb982');
  // Caminos secundarios de tierra compactada que conectan fincas y poblados.
  for(const r of OUTER_ROADS){
-  m.box(-edge,.010,r-.46,edge*2,.040,.92,'#897958','#76664b','#65583f');
-  m.box(r-.46,.010,-edge,.92,.040,edge*2,'#897958','#76664b','#65583f');
+  m.box(-ruralEdge,.010,r-.46,ruralEdge*2,.040,.92,'#897958','#76664b','#65583f');
+  m.box(r-.46,.010,-ruralEdge,.92,.040,ruralEdge*2,'#897958','#76664b','#65583f');
   for(const side of [-1,1]){
-   m.box(-edge,.014,r+side*.59,edge*2,.025,.12,'#b7a47a','#a18d67','#8c7958');
-   m.box(r+side*.59,.014,-edge,.12,.025,edge*2,'#b7a47a','#a18d67','#8c7958');
+   m.box(-ruralEdge,.014,r+side*.59,ruralEdge*2,.025,.12,'#b7a47a','#a18d67','#8c7958');
+   m.box(r+side*.59,.014,-ruralEdge,.12,.025,ruralEdge*2,'#b7a47a','#a18d67','#8c7958');
   }
  }
  // Pasos peatonales en los cuatro accesos a cada cruce, sin invadir el centro del cruce.
@@ -2782,12 +2787,12 @@ function addCar3D(m,o){
  }
 }
 function addStaticWorld(m){
- // Suelo amplio para que no aparezca un borde al alejar la cámara o moverla.
- // El barrio ocupa 45x45 unidades; este terreno deja margen para el zoom mínimo y el desplazamiento.
+ // Terreno y detalles cubren el mundo completo; el número de detalles se mantiene fijo.
  m.box(-110,-.34,-110,220,.34,220,'#8eaf70','#85a568','#74945d');
  addWalkableArea3D(m);addCityRoadNetwork3D(m);
+ const detailSpan=MAP_EDGE*20;
  for(let i=0;i<2300;i++){
-  const x=-70+((i*73)%1400)/10,z=-70+((i*127)%1400)/10;
+  const x=-MAP_EDGE+((i*73)%detailSpan)/10,z=-MAP_EDGE+((i*127)%detailSpan)/10;
   if(isBlocked(x,z,obstacles())||MAP_ROADS.some(r=>Math.abs(x-r)<1.32||Math.abs(z-r)<1.32))continue;
   m.box(x,.003,z,.10+(i%3)*.045,.012,.10+(i%2)*.05,['#9dbd7c','#a8c585','#8eae6d'][i%3]);
  }
@@ -2995,8 +3000,8 @@ function draw2D(){if(!ctx)return;const s=worldScale();
 
  // Accesos rurales de tierra, más estrechos que las avenidas del casco urbano.
  for(const r of OUTER_ROADS){
-  groundPath([[-CITY_EDGE,r-.46],[CITY_EDGE,r-.46],[CITY_EDGE,r+.46],[-CITY_EDGE,r+.46]],'#897958','#65583f');
-  groundPath([[r-.46,-CITY_EDGE],[r+.46,-CITY_EDGE],[r+.46,CITY_EDGE],[r-.46,CITY_EDGE]],'#897958','#65583f');
+  groundPath([[-MAP_EDGE,r-.46],[MAP_EDGE,r-.46],[MAP_EDGE,r+.46],[-MAP_EDGE,r+.46]],'#897958','#65583f');
+  groundPath([[r-.46,-MAP_EDGE],[r+.46,-MAP_EDGE],[r+.46,MAP_EDGE],[r-.46,MAP_EDGE]],'#897958','#65583f');
  }
  // House patios are driven by the exact same footprint used by collision checks.
  for(const o of sceneObjects())if(o.type==='house'||o.type==='shop')drawPavedPad(o.x-.06,o.y-.06,o.w+.12,o.d+.12,'#b8aa8a');
@@ -4131,7 +4136,8 @@ function findRoute(from,to){
  const start=nearestFreeNode(from,.75,blocks),goal=nearestFreeNode(to,.75,blocks),total=NAV.nx*NAV.ny;
  if(start<0||goal<0)return [];
  const parent=new Int32Array(total);parent.fill(-1);
- const gScore=new Float64Array(total);gScore.fill(Infinity);
+ // Float32 reduce a la mitad la memoria de costes; la tolerancia compensa su precisión finita.
+ const gScore=new Float32Array(total);gScore.fill(Infinity);
  const closed=new Uint8Array(total),open=[];
  const gp=gridPoint(goal),sp=gridPoint(start);
  const heuristic=p=>Math.hypot(p.x-gp.x,p.y-gp.y);
@@ -4139,7 +4145,7 @@ function findRoute(from,to){
  const dirs=[[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[1,-1],[-1,1],[1,1]];
  while(open.length){
   const [f,id,queuedG]=heapPop(open);
-  if(closed[id]||queuedG>gScore[id]+1e-8)continue;
+  if(closed[id]||queuedG>gScore[id]+5e-5)continue;
   if(id===goal)break;
   closed[id]=1;
   const ix=id%NAV.nx,iy=Math.floor(id/NAV.nx),cur=gridPoint(id);
@@ -4148,7 +4154,7 @@ function findRoute(from,to){
    const ni=ny*NAV.nx+nx;if(closed[ni])continue;
    const q=gridPoint(ni);if(!segmentClear(cur,q,blocks))continue;
    const edge=NAV.step*(sx&&sy?Math.SQRT2:1),tentative=gScore[id]+edge;
-   if(tentative+1e-8>=gScore[ni])continue;
+   if(tentative+1e-5>=gScore[ni])continue;
    parent[ni]=id;gScore[ni]=tentative;heapPush(open,[tentative+heuristic(q),ni,tentative]);
   }
  }
