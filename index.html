@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b27">
 <meta name="description" content="SIM Cuba: simulador de vida 3D low-poly ambientado en Cuba, con creador visual de personajes y ciudad explorable.">
-<title>SIM Cuba — Renderizado según zoom 0.43</title>
+<title>SIM Cuba — Renderizado y escala 0.44</title>
 <style>
 :root{color-scheme:dark;--cream:#f2e8cc;--muted:#b6c6b7;--green:#a7cf8a;--gold:#e6c779;--line:#ffffff30}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172b27;color:var(--cream);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:#29413a;border-radius:10px;padding:10px 13px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -721,7 +721,7 @@
 }
 
 
-/* SIM Cuba 0.43 — terreno y distancia de cámara adaptados al zoom */
+/* SIM Cuba 0.44 — distancia de renderizado y escala del personaje */
 .game-panel:not(.phone-mode){width:min(460px,calc(100vw - 28px));padding:15px}
 .game-action-list{gap:7px;margin-top:12px}
 .game-action{min-height:57px;padding:8px 9px;gap:8px}
@@ -931,7 +931,7 @@
     <button class="randomize-btn" id="randomizeBtn" type="button">⤨ Sorpréndeme · Aleatorio</button>
    </aside>
   </div>
-  <footer class="creator-footer"><span>SIM CUBA <b>0.43</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
+  <footer class="creator-footer"><span>SIM CUBA <b>0.44</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
  </div>
 </div>
 <script>
@@ -1223,7 +1223,7 @@ function drawRock(x,y,scale=1){const s=worldScale()*scale,p=iso(x,y);screenPoly(
 function skinColor(v){return ({'🏻':'#f2c7a3','🏽':'#d99f78','🏾':'#a96e4d','🏿':'#68422f'})[v]||'#d99f78'}
 function facingIndex(value){return ({down:0,up:1,left:2,right:3})[value]??0}
 function drawPerson(x,y,isPlayer=false,npcIndex=0){
- const s=worldScale(),p=iso(x,y),gx=snap(p[0]),gy=snap(p[1]);
+ const s=worldScale(),spriteScale=s*(isPlayer?.80:1),p=iso(x,y),gx=snap(p[0]),gy=snap(p[1]);
  const facing=isPlayer?player.facing:((npcIndex%3)===1?'left':(npcIndex%3)===2?'up':'down');
  const sheet=isPlayer?(playerCharacterSheet||ART.characters):ART.characters;
  // Columna 0 = pose idle; columnas 1..4 = ciclo de caminar en orden.
@@ -1232,8 +1232,8 @@ function drawPerson(x,y,isPlayer=false,npcIndex=0){
  screenPoly([[gx,gy-3*s],[gx+13*s,gy+2*s],[gx,gy+7*s],[gx-13*s,gy+2*s]],'#25392b80');
  if(isPlayer)screenPoly([[gx,gy-8*s],[gx+16*s,gy],[gx,gy+8*s],[gx-16*s,gy]],'#f5d77a18','#ead18b',1*s);
  const row=facingIndex(facing); // down, up, left, right
- const destY=gy-62*s + (isPlayer&&!player.moving ? Math.sin(player.idleTime*2.4)*.55*s : 0);
- const drawFrame=(frame,alpha)=>{ctx.save();ctx.globalAlpha=alpha;drawSprite(sheet,frame*48,row*64,48,64,gx-24*s,destY,48*s,64*s);ctx.restore()};
+ const destY=gy-62*spriteScale + (isPlayer&&!player.moving ? Math.sin(player.idleTime*2.4)*.55*spriteScale : 0);
+ const drawFrame=(frame,alpha)=>{ctx.save();ctx.globalAlpha=alpha;drawSprite(sheet,frame*48,row*64,48,64,gx-24*spriteScale,destY,48*spriteScale,64*spriteScale);ctx.restore()};
  if(isPlayer&&player.transitioning){
   const t=Math.max(0,Math.min(1,player.transitionTime/.14));
   const eased=t*t*(3-2*t);
@@ -1445,9 +1445,10 @@ function setupCamera(){
  // La cámara sigue al jugador para explorar toda la ciudad sin cambiar de pantalla por bloques.
  const target=[(started?player.x:0)+cameraPan.x,.25,(started?player.y:0)+cameraPan.z],eye=[target[0]+10,target[1]+11,target[2]+10],forward=vNorm(vSub(target,eye)),right=vNorm(vCross(forward,[0,1,0])),up=vNorm(vCross(right,forward));
  const aspect=W/Math.max(1,H),baseHalfH=aspect<.78?12.2:10.4,halfH=baseHalfH/cameraZoom,halfW=halfH*aspect;
- // Al alejar, el encuadre abarca más mundo: ampliamos el plano lejano para que
- // los objetos del fondo no desaparezcan antes de llegar al borde de la vista.
- const farClip=110+Math.max(0,halfH-baseHalfH)*3.2;
+ // El terreno principal mide 220x220 unidades. Su diagonal supera 150 unidades,
+ // y el desplazamiento de cámara puede sumar más distancia; 360 cubre el escenario
+ // completo incluso al alejar el zoom, sin recortar las esquinas del mapa.
+ const farClip=360+Math.max(0,halfH-baseHalfH)*4;
  const view=matLookAt(eye,target,[0,1,0]),proj=matOrtho(-halfW,halfW,-halfH,halfH,.1,farClip);
  cameraState.target=target;cameraState.eye=eye;cameraState.forward=forward;cameraState.right=right;cameraState.up=up;cameraState.halfH=halfH;cameraState.viewProj=matMul(proj,view);cameraState.ready=true;
 }
@@ -1976,6 +1977,15 @@ function addHuman3D(m,x,z,facing,shirt='#168b83',moving=false,phase=0,skin='#b77
 }
 function addDestinationMarker(m){if(!clickTarget)return;const x=clickTarget.x,z=clickTarget.y,r=.28,n=16;for(let i=0;i<n;i++){const a=i*Math.PI*2/n,b=(i+1)*Math.PI*2/n;m.quad([x+Math.cos(a)*r,.035,z+Math.sin(a)*r],[x+Math.cos(b)*r,.035,z+Math.sin(b)*r],[x+Math.cos(b)*r*(.72),.036,z+Math.sin(b)*r*(.72)],[x+Math.cos(a)*r*(.72),.036,z+Math.sin(a)*r*(.72)],'#e8c96f')}}
 function makeStaticLowPolyBuffer(){const m=new LowPolyMesh(true);addStaticWorld(m);return m.data}
+// Reduce solo el modelo del jugador alrededor de sus pies: conserva su posición
+// en el mundo y evita cambiar su altura respecto al suelo.
+function scalePlayerGeometry(data,start,x,z,scale){
+ for(let i=start;i<data.length;i+=6){
+  data[i]=x+(data[i]-x)*scale;
+  data[i+1]*=scale;
+  data[i+2]=z+(data[i+2]-z)*scale;
+ }
+}
 function uploadLowPoly(buffer,data,usage){gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),usage)}
 function drawLowPolyBuffer(buffer,count){if(!count)return;gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.enableVertexAttribArray(lowPolyAttribPos);gl.vertexAttribPointer(lowPolyAttribPos,3,gl.FLOAT,false,24,0);gl.enableVertexAttribArray(lowPolyAttribColor);gl.vertexAttribPointer(lowPolyAttribColor,3,gl.FLOAT,false,24,12);gl.drawArrays(gl.TRIANGLES,0,count)}
 function render3D(){
@@ -1984,7 +1994,9 @@ function render3D(){
  if(lowPolyStaticZone!==zone){const data=makeStaticLowPolyBuffer();uploadLowPoly(lowPolyStaticBuffer,data,gl.STATIC_DRAW);lowPolyStaticCount=data.length/6;lowPolyStaticZone=zone}
  const dyn=new LowPolyMesh(),phase=player.walkTime*Math.PI/4;
  // No se generan peatones ambientales en esta etapa; solo se dibuja el personaje del jugador.
+ const playerGeometryStart=dyn.data.length;
  addHuman3D(dyn,player.x,player.y,player.yaw,player.shirt||'#168b83',player.moving,phase,(CREATOR_SKIN[player.skin]||'#bd8965'),player);
+ scalePlayerGeometry(dyn.data,playerGeometryStart,player.x,player.y,.80);
  addDestinationMarker(dyn);uploadLowPoly(lowPolyDynamicBuffer,dyn.data,gl.DYNAMIC_DRAW);
  gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);gl.clearColor(.52,.70,.73,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
  gl.useProgram(lowPolyProgram);gl.uniformMatrix4fv(lowPolyUniformMvp,false,cameraState.viewProj);
