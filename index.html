@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b27">
 <meta name="description" content="SIM Cuba: simulador de vida 3D low-poly ambientado en Cuba, con creador visual de personajes y ciudad explorable.">
-<title>SIM Cuba — Comercios, empleo y dominó 0.59</title>
+<title>SIM Cuba — Comercios, empleo y dominó 0.60</title>
 <style>
 :root{color-scheme:dark;--cream:#f2e8cc;--muted:#b6c6b7;--green:#a7cf8a;--gold:#e6c779;--line:#ffffff30}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172b27;color:var(--cream);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:#29413a;border-radius:10px;padding:10px 13px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -721,7 +721,7 @@
 }
 
 
-/* SIM Cuba 0.59 — interfaces por negocio, turno temporizado y dominó contra IA */
+/* SIM Cuba 0.60 — interfaces por negocio, turno temporizado y dominó contra IA */
 .game-panel:not(.phone-mode){width:min(460px,calc(100vw - 28px));padding:15px}
 .game-action-list{gap:7px;margin-top:12px}
 .game-action{min-height:57px;padding:8px 9px;gap:8px}
@@ -742,7 +742,7 @@
 }
 
 
-/* SIM Cuba 0.59 — interfaces específicas de negocios, jornada y dominó */
+/* SIM Cuba 0.60 — interfaces específicas de negocios, jornada y dominó */
 .game-panel.business-mode,.game-panel.work-mode,.game-panel.domino-mode{width:min(590px,100%);max-height:min(88dvh,780px)}
 .game-panel.business-mode #gameActionList,.game-panel.work-mode #gameActionList,.game-panel.domino-mode #gameActionList{display:block;margin-top:12px}
 .business-interface{display:flex;flex-direction:column;gap:11px}
@@ -811,7 +811,7 @@
 }
 
 
-/* SIM Cuba 0.59 — mesa de dominó con cadena serpenteante, fichas con puntos y movimiento */
+/* SIM Cuba 0.60 — mesa de dominó con cadena serpenteante, fichas con puntos y movimiento */
 .game-panel.domino-mode{width:min(790px,calc(100vw - 30px));max-height:min(94dvh,920px);padding:17px}
 .game-panel.domino-mode #gameActionList{display:block;margin-top:12px;max-height:calc(94dvh - 150px);overflow:auto;scrollbar-width:thin}
 .domino-interface{display:flex;flex-direction:column;gap:12px}
@@ -910,7 +910,7 @@
 }
 
 
-/* SIM Cuba 0.59 — dominó centrado, pases y fichas más legibles */
+/* SIM Cuba 0.60 — dominó centrado, pases y fichas más legibles */
 .game-panel.domino-mode{width:min(860px,calc(100vw - 22px));}
 .domino-table-felt{min-height:390px;}
 .domino-board-scroll{max-height:330px;min-height:180px;overflow:auto;padding:10px 4px;}
@@ -955,6 +955,21 @@
  .domino-hand-tile .domino-pip-grid i{width:4.6px;height:4.6px;}
  .domino-score-stat{font-size:7px;}
  .domino-turn-badge{font-size:8px;}
+}
+
+
+/* SIM Cuba 0.60 — separador correcto para las fichas seleccionables */
+.domino-hand-tile .domino-divider{
+ display:block;
+ flex:0 0 2px;
+ width:2px;
+ min-width:2px;
+ height:80%;
+ align-self:center;
+ border:0;
+ border-radius:99px;
+ background:linear-gradient(180deg,transparent 0%,#8b744f 12%,#6f5b3d 50%,#8b744f 88%,transparent 100%);
+ box-shadow:1px 0 0 #fff9,0 0 1px #665638;
 }
 
 </style>
@@ -1147,7 +1162,7 @@
     <button class="randomize-btn" id="randomizeBtn" type="button">⤨ Sorpréndeme · Aleatorio</button>
    </aside>
   </div>
-  <footer class="creator-footer"><span>SIM CUBA <b>0.59</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
+  <footer class="creator-footer"><span>SIM CUBA <b>0.60</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
  </div>
 </div>
 <script>
