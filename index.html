@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b27">
 <meta name="description" content="SIM Cuba: simulador de vida 3D low-poly ambientado en Cuba, con creador visual de personajes y ciudad explorable.">
-<title>SIM Cuba — Gran mapa verde 0.82</title>
+<title>SIM Cuba — Gran mapa verde 0.83</title>
 <style>
 :root{color-scheme:dark;--cream:#f2e8cc;--muted:#b6c6b7;--green:#a7cf8a;--gold:#e6c779;--line:#ffffff30}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172b27;color:var(--cream);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:#29413a;border-radius:10px;padding:10px 13px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -1717,7 +1717,7 @@
     <button class="randomize-btn" id="randomizeBtn" type="button">⤨ Sorpréndeme · Aleatorio</button>
    </aside>
   </div>
-  <footer class="creator-footer"><span>SIM CUBA <b>0.82</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
+  <footer class="creator-footer"><span>SIM CUBA <b>0.83</b></span><span>Personaliza tu personaje antes de comenzar</span><span>Diseño local, sin descargas adicionales</span></footer>
  </div>
 </div>
 <script>
@@ -2192,7 +2192,7 @@ function buildCityObjects(){
   {x:0,z:-54,style:'colonial',shop:'bodega'},
   {x:0,z:54,style:'house',shop:'market'},
   {x:-54,z:0,style:'colonial',shop:'workshop'},
-  {x:54,z:0,style:'house',shop:'cafe'}
+  {x:54,z:0,style:'house',shop:'restaurant'}
  ];
  satelliteVillages.forEach((v,index)=>{
   addBuilding(v.x-3.7,v.z-2.8,2.5,2.4,v.style,index+2);
@@ -2334,6 +2334,19 @@ function updateWorldLabels(){
 }
 createWorldLabels();
 function sceneObjects(){return CITY_OBJECTS}
+function drawPondObject(o){
+ const s=worldScale(),rx=o.rx||1.4,rz=o.rz||.95,points=[];
+ for(let i=0;i<14;i++){
+  const a=i*Math.PI*2/14;
+  points.push(iso(o.x+Math.cos(a)*rx,o.y+Math.sin(a)*rz));
+ }
+ screenPoly(points,'#75a9a2','#466e68',1.5*s);
+ // Reflejos discretos para que el agua también se lea bien en el render 2D.
+ for(let i=0;i<3;i++){
+  const p=iso(o.x-rx*.30+i*rx*.28,o.y-rz*.10);
+  rectPx(p[0]-3*s,p[1]-s,7*s,1.5*s,'#b4d3c4');
+ }
+}
 function drawSceneObject(o){
  switch(o.type){
   case 'house':case 'shop':drawBuildingObject(o);break;
@@ -2345,6 +2358,7 @@ function drawSceneObject(o){
   case 'cart':drawStreetVendorCart(o.x,o.y);break;
   case 'fence':drawFence(o.x,o.y,o.length);break;
   case 'rock':drawRock(o.x,o.y,o.scale||1);break;
+  case 'pond':drawPondObject(o);break;
  }
 }
 function objectDepth(o){return o.type==='house'||o.type==='shop'?(o.x+o.w/2)+(o.y+o.d/2):o.x+o.y}
